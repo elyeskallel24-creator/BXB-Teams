@@ -17,12 +17,12 @@ export default function Login() {
     setError('');
     const email = userIdCode.trim().toLowerCase() + '@bxb-team.com';
     try {
-      if (password.length < 8) throw new Error("Password must be at least 8 characters.");
+      if (password.length < 8) throw new Error('Password must be at least 8 characters.');
       if (isSignUp) {
-        if (!file) throw new Error("Please select a profile photo.");
+        if (!file) throw new Error('Please select a profile photo.');
         const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
         if (authError) throw authError;
-        if (!authData.user) throw new Error("Signup failed.");
+        if (!authData.user) throw new Error('Signup failed.');
         const fileExt = file.name.split('.').pop();
         const filePath = authData.user.id + '-' + Math.random() + '.' + fileExt;
         const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
@@ -39,49 +39,62 @@ export default function Login() {
         if (authError) throw authError;
       }
     } catch (err: any) {
-      setError(err.message || "An error occurred.");
+      setError(err.message || 'An error occurred.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-brand-bgLight dark:bg-brand-bgDark p-4">
-      <div className="max-w-md w-full bg-white dark:bg-brand-cardDark rounded-2xl shadow-xl p-8 border border-brand-borderLight dark:border-brand-borderDark">
+    <div className="min-h-screen flex items-center justify-center bg-surface-light dark:bg-surface-dark p-4 animate-enter">
+      <div className="w-full max-w-[420px] bg-surface-cardLight dark:bg-surface-cardDark rounded-3xl shadow-float p-8 md:p-10 border border-surface-borderLight dark:border-surface-borderDark">
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.webp" alt="Logo" className="w-16 h-16 rounded-2xl object-cover mb-4 shadow-sm" />
-          <h1 className="text-2xl font-bold text-brand-secondary dark:text-white text-center">
+          <img src="/logo.webp" alt="Logo" width={64} height={64} fetchPriority="high" className="w-16 h-16 rounded-2xl object-cover mb-5 shadow-soft" />
+          <h1 className="text-2xl font-bold tracking-tight text-center">
             {isSignUp ? 'Claim your Team ID' : 'Welcome back'}
           </h1>
+          <p className="text-text-secondaryLight dark:text-text-secondaryDark mt-2 text-sm text-center">
+            {isSignUp ? 'Enter your assigned ID to join the team.' : 'Enter your ID and password to continue.'}
+          </p>
         </div>
+        
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-brand-secondary dark:text-gray-300 mb-1">User ID</label>
-            <input type="text" required value={userIdCode} onChange={e => setUserIdCode(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-brand-borderLight dark:border-brand-borderDark bg-transparent focus:ring-2 focus:ring-brand-primary outline-none text-brand-secondary dark:text-white" />
+            <label className="block text-sm font-semibold mb-1.5 ml-1">User ID</label>
+            <input type="text" required value={userIdCode} onChange={e => setUserIdCode(e.target.value)} className="input-field" />
           </div>
+          
           {isSignUp && (
             <>
               <div>
-                <label className="block text-sm font-medium text-brand-secondary dark:text-gray-300 mb-1">Username</label>
-                <input type="text" required value={username} onChange={e => setUsername(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-brand-borderLight dark:border-brand-borderDark bg-transparent focus:ring-2 focus:ring-brand-primary outline-none text-brand-secondary dark:text-white" />
+                <label className="block text-sm font-semibold mb-1.5 ml-1">Username</label>
+                <input type="text" required value={username} onChange={e => setUsername(e.target.value)} className="input-field" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-brand-secondary dark:text-gray-300 mb-1">Profile Photo</label>
-                <input type="file" accept="image/*" required onChange={e => setFile(e.target.files?.[0] || null)} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20" />
+                <label className="block text-sm font-semibold mb-1.5 ml-1">Profile Photo</label>
+                <input type="file" accept="image/*" required onChange={e => setFile(e.target.files?.[0] || null)} className="block w-full text-sm text-text-secondaryLight dark:text-text-secondaryDark file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20 transition-colors cursor-pointer" />
               </div>
             </>
           )}
+          
           <div>
-            <label className="block text-sm font-medium text-brand-secondary dark:text-gray-300 mb-1">Password</label>
-            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-brand-borderLight dark:border-brand-borderDark bg-transparent focus:ring-2 focus:ring-brand-primary outline-none text-brand-secondary dark:text-white" />
+            <label className="block text-sm font-semibold mb-1.5 ml-1">Password</label>
+            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="input-field" />
           </div>
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          <button type="submit" disabled={loading} className="w-full bg-brand-primary text-brand-secondary font-bold py-3 rounded-xl hover:bg-brand-accent transition-colors flex justify-center items-center gap-2">
-            {loading ? <Loader2 className="animate-spin" size={20} /> : (isSignUp ? 'Sign Up' : 'Log In')}
+          
+          {error && (
+            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium text-center animate-enter">
+              {error}
+            </div>
+          )}
+          
+          <button type="submit" disabled={loading} className="btn-primary w-full mt-2 py-3.5 text-base">
+            {loading ? <Loader2 className="animate-spin" size={22} /> : (isSignUp ? 'Create Account' : 'Log In')}
           </button>
         </form>
-        <div className="mt-6 text-center">
-          <button onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="text-sm text-brand-primary font-medium hover:underline">
+        
+        <div className="mt-8 text-center">
+          <button type="button" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="text-sm font-semibold text-brand-primary hover:text-brand-accent transition-colors">
             {isSignUp ? 'Already have an account? Log in' : 'New here? Claim your User ID'}
           </button>
         </div>
