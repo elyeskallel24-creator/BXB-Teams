@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { PlusCircle, Loader2, FileText, Download, Plus } from 'lucide-react';
@@ -31,7 +31,7 @@ export default function Resources() {
   async function fetchResources() {
     const { data, error } = await supabase
       .from('resources')
-      .select(`id, title, description, category, file_path, file_size, created_at`)
+      .select('id, title, description, category, file_path, file_size, created_at')
       .order('created_at', { ascending: false });
 
     if (!error && data) setResources(data as any);
@@ -44,8 +44,8 @@ export default function Resources() {
     setIsUploading(true);
     
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${profile?.team_id}/${fileName}`;
+    const fileName = Math.random() + '.' + fileExt;
+    const filePath = profile?.team_id + '/' + fileName;
 
     const { error: uploadError } = await supabase.storage.from('resources').upload(filePath, file);
     
@@ -141,7 +141,7 @@ export default function Resources() {
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-text-secondaryLight dark:text-text-secondaryDark">
                     <span className="bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded text-black dark:text-white">{res.category}</span>
                     <span>{(res.file_size / 1024 / 1024).toFixed(2)} MB</span>
-                    <span>�</span>
+                    <span>•</span>
                     <span>{new Date(res.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -157,7 +157,6 @@ export default function Resources() {
         </div>
       )}
 
-      {/* Mobile Floating Action Button */}
       {profile?.role === 'admin' && (
         <button 
           onClick={() => { setShowForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
