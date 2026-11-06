@@ -1,0 +1,1 @@
+CREATE POLICY "Admins can insert allowed_user_ids" ON public.allowed_user_ids FOR INSERT WITH CHECK (team_id = public.get_my_team_id() AND auth.uid() IN (SELECT id FROM public.profiles WHERE role = 'admin'));

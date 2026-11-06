@@ -1,0 +1,41 @@
+CREATE TYPE public.user_role AS ENUM ('admin', 'member');
+CREATE TYPE public.update_tag AS ENUM ('Meeting', 'Product', 'Pricing', 'Announcement', 'Urgent');
+CREATE TABLE public.teams (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), name text NOT NULL, created_at timestamptz DEFAULT now());
+CREATE TABLE public.profiles (id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE, team_id uuid REFERENCES public.teams(id) NOT NULL, user_id_code text UNIQUE NOT NULL, username text NOT NULL, avatar_url text, role public.user_role DEFAULT 'member'::public.user_role NOT NULL, created_at timestamptz DEFAULT now());
+CREATE TABLE public.allowed_user_ids (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), team_id uuid REFERENCES public.teams(id) NOT NULL, user_id_code text UNIQUE NOT NULL, role public.user_role DEFAULT 'member'::public.user_role NOT NULL, is_used boolean DEFAULT false, created_at timestamptz DEFAULT now());
+CREATE TABLE public.updates (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), team_id uuid REFERENCES public.teams(id) NOT NULL, author_id uuid REFERENCES public.profiles(id) NOT NULL, title text NOT NULL, content text NOT NULL, image_url text, tag public.update_tag, created_at timestamptz DEFAULT now(), deleted_at timestamptz);
+CREATE TABLE public.resources (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), team_id uuid REFERENCES public.teams(id) NOT NULL, author_id uuid REFERENCES public.profiles(id) NOT NULL, title text NOT NULL, description text, category text, file_path text NOT NULL, file_size bigint NOT NULL, created_at timestamptz DEFAULT now(), deleted_at timestamptz);
+CREATE TABLE public.audit_logs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), team_id uuid REFERENCES public.teams(id) NOT NULL, actor_id uuid REFERENCES public.profiles(id) NOT NULL, action text NOT NULL, table_name text NOT NULL, record_id uuid, created_at timestamptz DEFAULT now());
+ALTER TABLE public.teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.allowed_user_ids ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.updates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.resources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+CREATE INDEX idx_profiles_team ON public.profiles(team_id);
+CREATE INDEX idx_updates_team_created ON public.updates(team_id, created_at DESC);
+CREATE INDEX idx_resources_team_created ON public.resources(team_id, created_at DESC);
+CREATE OR REPLACE FUNCTION public.get_my_team_id() RETURNS uuid AS $$ SELECT team_id FROM public.profiles WHERE id = auth.uid(); $$ LANGUAGE sql SECURITY DEFINER SET search_path = public;
+CREATE POLICY "Users can read own team" ON public.teams FOR SELECT USING (id = public.get_my_team_id());
+CREATE POLICY "Users can read own team profiles" ON public.profiles FOR SELECT USING (team_id = public.get_my_team_id());
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (id = auth.uid()) WITH CHECK (id = auth.uid());
+CREATE POLICY "Users can read allowed user ids" ON public.allowed_user_ids FOR SELECT USING (team_id = public.get_my_team_id());
+CREATE POLICY "Users can read updates" ON public.updates FOR SELECT USING (team_id = public.get_my_team_id());
+CREATE POLICY "Users can read resources" ON public.resources FOR SELECT USING (team_id = public.get_my_team_id());
+CREATE OR REPLACE FUNCTION public.claim_user_id(p_user_id_code text, p_username text, p_avatar_url text) RETURNS json AS $$
+DECLARE
+  v_allowed_id uuid;
+  v_team_id uuid;
+  v_role public.user_role;
+  v_user_id uuid;
+BEGIN
+  SELECT id, team_id, role INTO v_allowed_id, v_team_id, v_role FROM public.allowed_user_ids WHERE user_id_code = p_user_id_code AND is_used = false FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Invalid or already used User ID.'; END IF;
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN RAISE EXCEPTION 'Not authenticated.'; END IF;
+  UPDATE public.allowed_user_ids SET is_used = true WHERE id = v_allowed_id;
+  INSERT INTO public.profiles (id, team_id, user_id_code, username, avatar_url, role) VALUES (v_user_id, v_team_id, p_user_id_code, p_username, p_avatar_url, v_role);
+  RETURN json_build_object('success', true);
+END; $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+INSERT INTO public.teams (id, name) VALUES ('00000000-0000-0000-0000-000000000000', 'Sales Team');
+INSERT INTO public.allowed_user_ids (team_id, user_id_code, role) VALUES ('00000000-0000-0000-0000-000000000000', 'SALES-0001', 'admin');

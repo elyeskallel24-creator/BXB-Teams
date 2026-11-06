@@ -1,0 +1,10 @@
+DROP POLICY IF EXISTS "Users can read own team profiles" ON public.profiles;
+CREATE POLICY "Authenticated users can read all profiles" ON public.profiles FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users can read updates" ON public.updates;
+CREATE POLICY "Authenticated users can read updates" ON public.updates FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users can read resources" ON public.resources;
+CREATE POLICY "Authenticated users can read resources" ON public.resources FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users can read own team" ON public.teams;
+CREATE POLICY "Authenticated users can read teams" ON public.teams FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users can read allowed user ids" ON public.allowed_user_ids;
+CREATE POLICY "Authenticated users can read allowed_user_ids" ON public.allowed_user_ids FOR SELECT TO authenticated USING (true);
