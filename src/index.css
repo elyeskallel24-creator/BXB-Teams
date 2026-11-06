@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -16,6 +16,9 @@
   body {
     @apply bg-surface-light dark:bg-surface-dark text-text-primaryLight dark:text-text-primaryDark font-sans transition-colors duration-300 ease-smooth;
   }
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
   ::selection {
     @apply bg-brand-primary/30;
   }
@@ -23,19 +26,19 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-brand-primary text-black font-semibold rounded-xl px-5 py-3 transition-all duration-200 ease-smooth hover:bg-brand-primaryHover active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2;
+    @apply bg-brand-primary text-black font-semibold rounded-xl h-[44px] px-4 text-[15px] transition-all duration-200 ease-smooth hover:bg-brand-primaryHover active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2;
   }
   .btn-secondary {
-    @apply bg-surface-cardLight dark:bg-surface-cardDark text-text-primaryLight dark:text-text-primaryDark border border-surface-borderLight dark:border-surface-borderDark font-medium rounded-xl px-5 py-3 transition-all duration-200 ease-smooth hover:bg-gray-50 dark:hover:bg-[#1A1A1A] active:scale-[0.98] flex items-center justify-center gap-2;
+    @apply bg-surface-cardLight dark:bg-surface-cardDark text-text-primaryLight dark:text-text-primaryDark border border-surface-borderLight dark:border-surface-borderDark font-medium rounded-xl h-[44px] px-4 text-[15px] transition-all duration-200 ease-smooth hover:bg-gray-50 dark:hover:bg-[#1A1A1A] active:scale-[0.98] flex items-center justify-center gap-2;
   }
   .card {
-    @apply bg-surface-cardLight dark:bg-surface-cardDark rounded-2xl shadow-soft border border-surface-borderLight dark:border-surface-borderDark p-6 transition-all duration-200 ease-smooth;
+    @apply bg-surface-cardLight dark:bg-surface-cardDark rounded-[18px] md:rounded-2xl shadow-soft border border-surface-borderLight dark:border-surface-borderDark p-3.5 md:p-5 transition-all duration-200 ease-smooth;
   }
   .input-field {
-    @apply w-full bg-transparent border border-surface-borderLight dark:border-surface-borderDark rounded-xl px-4 py-3 text-text-primaryLight dark:text-text-primaryDark placeholder:text-text-secondaryLight dark:placeholder:text-text-secondaryDark focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all duration-200 ease-smooth;
+    @apply w-full bg-transparent border border-surface-borderLight dark:border-surface-borderDark rounded-xl h-[44px] px-3 text-[16px] text-text-primaryLight dark:text-text-primaryDark placeholder:text-text-secondaryLight dark:placeholder:text-text-secondaryDark focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all duration-200 ease-smooth;
   }
   .page-title {
-    @apply text-3xl font-bold tracking-tight text-text-primaryLight dark:text-text-primaryDark mb-6;
+    @apply text-[26px] md:text-[32px] font-bold tracking-tight text-text-primaryLight dark:text-text-primaryDark mb-2 ml-1;
   }
 }
 

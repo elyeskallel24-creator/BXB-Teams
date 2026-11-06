@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { supabase } from '../supabase';
 import { Loader2 } from 'lucide-react';
 
@@ -47,54 +47,54 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface-light dark:bg-surface-dark p-4 animate-enter">
-      <div className="w-full max-w-[420px] bg-surface-cardLight dark:bg-surface-cardDark rounded-3xl shadow-float p-8 md:p-10 border border-surface-borderLight dark:border-surface-borderDark">
-        <div className="flex flex-col items-center mb-8">
-          <img src="/logo.webp" alt="Logo" width={64} height={64} fetchPriority="high" className="w-16 h-16 rounded-2xl object-cover mb-5 shadow-soft" />
-          <h1 className="text-2xl font-bold tracking-tight text-center">
+      <div className="w-full max-w-[360px] bg-surface-cardLight dark:bg-surface-cardDark rounded-3xl shadow-float p-6 border border-surface-borderLight dark:border-surface-borderDark">
+        <div className="flex flex-col items-center mb-6">
+          <img src="/logo.webp" alt="Logo" width={56} height={56} fetchPriority="high" className="w-14 h-14 rounded-2xl object-cover mb-4 shadow-sm" />
+          <h1 className="text-[22px] font-bold tracking-tight text-center">
             {isSignUp ? 'Claim your Team ID' : 'Welcome back'}
           </h1>
-          <p className="text-text-secondaryLight dark:text-text-secondaryDark mt-2 text-sm text-center">
-            {isSignUp ? 'Enter your assigned ID to join the team.' : 'Enter your ID and password to continue.'}
+          <p className="text-text-secondaryLight dark:text-text-secondaryDark mt-1 text-[13px] text-center">
+            {isSignUp ? 'Enter your assigned ID to join.' : 'Enter your ID and password to continue.'}
           </p>
         </div>
         
-        <form onSubmit={handleAuth} className="space-y-4">
+        <form onSubmit={handleAuth} className="space-y-3">
           <div>
-            <label className="block text-sm font-semibold mb-1.5 ml-1">User ID</label>
+            <label className="block text-[13px] font-semibold mb-1 ml-1">User ID</label>
             <input type="text" required value={userIdCode} onChange={e => setUserIdCode(e.target.value)} className="input-field" />
           </div>
           
           {isSignUp && (
             <>
               <div>
-                <label className="block text-sm font-semibold mb-1.5 ml-1">Username</label>
+                <label className="block text-[13px] font-semibold mb-1 ml-1">Username</label>
                 <input type="text" required value={username} onChange={e => setUsername(e.target.value)} className="input-field" />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1.5 ml-1">Profile Photo</label>
-                <input type="file" accept="image/*" required onChange={e => setFile(e.target.files?.[0] || null)} className="block w-full text-sm text-text-secondaryLight dark:text-text-secondaryDark file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20 transition-colors cursor-pointer" />
+                <label className="block text-[13px] font-semibold mb-1 ml-1">Profile Photo</label>
+                <input type="file" accept="image/*" required onChange={e => setFile(e.target.files?.[0] || null)} className="block w-full text-[13px] text-text-secondaryLight dark:text-text-secondaryDark file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[13px] file:font-semibold file:bg-brand-primary/10 file:text-brand-primary hover:file:bg-brand-primary/20 transition-colors cursor-pointer" />
               </div>
             </>
           )}
           
           <div>
-            <label className="block text-sm font-semibold mb-1.5 ml-1">Password</label>
+            <label className="block text-[13px] font-semibold mb-1 ml-1">Password</label>
             <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="input-field" />
           </div>
           
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm font-medium text-center animate-enter">
+            <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-[13px] font-medium text-center animate-enter">
               {error}
             </div>
           )}
           
-          <button type="submit" disabled={loading} className="btn-primary w-full mt-2 py-3.5 text-base">
-            {loading ? <Loader2 className="animate-spin" size={22} /> : (isSignUp ? 'Create Account' : 'Log In')}
+          <button type="submit" disabled={loading} className="btn-primary w-full mt-2">
+            {loading ? <Loader2 className="animate-spin" size={18} /> : (isSignUp ? 'Create Account' : 'Log In')}
           </button>
         </form>
         
-        <div className="mt-8 text-center">
-          <button type="button" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="text-sm font-semibold text-brand-primary hover:text-brand-accent transition-colors">
+        <div className="mt-6 text-center">
+          <button type="button" onClick={() => { setIsSignUp(!isSignUp); setError(''); }} className="text-[13px] font-semibold text-brand-primary hover:text-brand-accent transition-colors">
             {isSignUp ? 'Already have an account? Log in' : 'New here? Claim your User ID'}
           </button>
         </div>
