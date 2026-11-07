@@ -18,6 +18,7 @@ const SuspenseFallback = () => createPortal(
 type Resource = { id: string; title: string; description: string; category: string; file_path: string; file_size: number; created_at: string; };
 
 export default function Resources() {
+  console.log("Resources RENDER");
   const { profile } = useAuth();
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,8 +37,12 @@ export default function Resources() {
 
   useEffect(() => { 
     fetchResources(); 
-    fetchSaved();
   }, []);
+
+  useEffect(() => {
+    if (!profile?.id) return;
+    fetchSaved();
+  }, [profile?.id]);
 
   async function fetchResources() {
     const { data, error } = await supabase.from('resources').select('id, title, description, category, file_path, file_size, created_at').order('created_at', { ascending: false });
@@ -46,7 +51,8 @@ export default function Resources() {
   }
 
   async function fetchSaved() {
-    const { data } = await supabase.from('saved_resources').select('resource_id').eq('user_id', profile?.id);
+    if (!profile?.id) return;
+    const { data } = await supabase.from('saved_resources').select('resource_id').eq('user_id', profile.id);
     if (data) setSavedIds(new Set(data.map(d => d.resource_id)));
   }
 

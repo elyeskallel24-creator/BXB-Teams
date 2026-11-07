@@ -1,4 +1,5 @@
-﻿import { useState, useEffect, useRef, useCallback, memo } from 'react';
+﻿import { useState, useEffect, useCallback, useRef, memo } from 'react';
+import type { WheelEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
@@ -73,10 +74,9 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
   const [numPages, setNumPages] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
-  const [containerWidth, setContainerWidth] = useState<number | null>(null);
+  const [pdfWidth, setPdfWidth] = useState(() => Math.min(window.innerWidth - 40, 1000));
   const [scale, setScale] = useState(1);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
 
   useEffect(() => {
@@ -107,31 +107,26 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
   }, [numPages]);
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
     let timeoutId: any;
+    let lastWidth = window.innerWidth;
     
-    const observer = new ResizeObserver(entries => {
+    const handleResize = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        const newWidth = entries[0].contentRect.width;
-        if (newWidth > 0) {
-          setContainerWidth(prev => {
-            if (prev === null || Math.abs(prev - newWidth) >= 4) {
-              console.log(`width changed to ${newWidth}`);
-              return newWidth;
-            }
-            return prev;
-          });
+        if (Math.abs(window.innerWidth - lastWidth) >= 100) {
+          lastWidth = window.innerWidth;
+          const newW = Math.min(lastWidth - 40, 1000);
+          console.log(`width changed to ${newW}`);
+          setPdfWidth(newW);
         }
-      }, 150);
-    });
+      }, 300);
+    };
     
-    observer.observe(el);
-    return () => { observer.disconnect(); clearTimeout(timeoutId); };
+    window.addEventListener('resize', handleResize);
+    return () => { window.removeEventListener('resize', handleResize); clearTimeout(timeoutId); };
   }, []);
 
-  const handleWheel = useCallback((e: React.WheelEvent) => {
+  const handleWheel = useCallback((e: WheelEvent) => {
     if (e.ctrlKey) {
       e.preventDefault();
       setScale(prev => Math.min(Math.max(prev - e.deltaY * 0.01, 0.5), 3));
@@ -152,8 +147,7 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
     setError(true);
   }, []);
 
-  const ready = containerWidth !== null && aspectRatio !== null;
-  const basePdfWidth = containerWidth ? Math.min(containerWidth - 24, 1000) : 0;
+  const ready = aspectRatio !== null;
   
   const content = (
     <motion.div 
@@ -178,10 +172,9 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
       </div>
 
       <div 
-        ref={containerRef} 
-        onWheel={handleWheel} 
         className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center py-6 gap-3 bg-[#1A1A1A] relative"
-        style={{ overflowAnchor: 'none' }}
+        style={{ scrollbarGutter: 'stable', overflowAnchor: 'none' }}
+        onWheel={handleWheel} 
       >
         {error || timedOut ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
@@ -206,7 +199,7 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
               <LazyPage 
                 key={`page_${index + 1}`} 
                 pageNumber={index + 1} 
-                width={basePdfWidth} 
+                width={pdfWidth} 
                 scale={scale} 
                 aspectRatio={aspectRatio!}
               />
@@ -225,3 +218,4 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
 
   return createPortal(content, document.body);
 }
+

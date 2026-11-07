@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+﻿import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { supabase } from '../supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -17,9 +17,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!session) setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (!session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(prev => {
+        if (prev && newSession && prev.user.id === newSession.user.id) {
+          console.log('AuthContext: session ignored');
+          return prev;
+        }
+        console.log('AuthContext: session changed');
+        return newSession;
+      });
+      if (!newSession) {
         setProfile(null);
         setLoading(false);
       }
@@ -29,23 +36,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!session) return;
+    const userId = session?.user.id;
+    if (!userId) return;
 
     async function fetchProfile() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', session!.user.id)
+        .eq('id', userId)
         .maybeSingle();
 
       if (error) console.error("Error fetching profile:", error.message);
-      if (data) setProfile(data);
+      if (data) {
+        setProfile(prev => {
+          if (prev?.id === data.id && prev?.username === data.username && prev?.role === data.role && prev?.avatar_url === data.avatar_url) {
+            return prev;
+          }
+          return data;
+        });
+      }
       setLoading(false);
     }
 
     fetchProfile();
-  }, [session]);
+  }, [session?.user.id]);
 
-  return <AuthContext.Provider value={{ session, profile, loading }}>{children}</AuthContext.Provider>;
+  const value = useMemo(() => ({ session, profile, loading }), [session, profile, loading]);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 export const useAuth = () => useContext(AuthContext);
