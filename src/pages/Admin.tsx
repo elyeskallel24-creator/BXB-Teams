@@ -1,12 +1,15 @@
 ﻿import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, UserCheck, Shield, Plus } from 'lucide-react';
+import { Loader2, UserCheck, Shield, Plus, Globe, Users } from 'lucide-react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 
 type AllowedId = { id: string; user_id_code: string; role: string; is_used: boolean; created_at: string; };
 type IdType = 'SALES' | 'DEV';
 type RoleType = 'member' | 'admin';
+type TeamType = 'sales' | 'dev' | 'mixed';
+type Country = { id: string; name: string; code: string; };
+type Team = { id: string; name: string; team_type: string; countries: { name: string } | null; };
 
 function SegmentedControl<T extends string>({
   group,
@@ -47,19 +50,44 @@ function SegmentedControl<T extends string>({
 export default function Admin() {
   const { profile } = useAuth();
   const [allowedIds, setAllowedIds] = useState<AllowedId[]>([]);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [idType, setIdType] = useState<IdType>('SALES');
   const [role, setRole] = useState<RoleType>('member');
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const [countryName, setCountryName] = useState('');
+  const [countryCode, setCountryCode] = useState('');
+  const [isCreatingCountry, setIsCreatingCountry] = useState(false);
+
+  const [teamName, setTeamName] = useState('');
+  const [selectedCountryId, setSelectedCountryId] = useState('');
+  const [teamType, setTeamType] = useState<TeamType>('sales');
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+
   useEffect(() => {
-    if (profile?.role === 'admin') fetchAllowedIds();
+    if (profile?.role === 'admin') {
+      fetchAllowedIds();
+      fetchCountries();
+      fetchTeams();
+    }
   }, [profile]);
 
   async function fetchAllowedIds() {
     const { data } = await supabase.from('allowed_user_ids').select('*').order('created_at', { ascending: false });
     if (data) setAllowedIds(data);
     setLoading(false);
+  }
+
+  async function fetchCountries() {
+    const { data } = await supabase.from('countries').select('*').order('name');
+    if (data) setCountries(data);
+  }
+
+  async function fetchTeams() {
+    const { data } = await supabase.from('teams').select('*, countries(name)').order('name');
+    if (data) setTeams(data);
   }
 
   async function generateId(e: React.FormEvent) {
@@ -76,6 +104,36 @@ export default function Admin() {
       .insert({ team_id: profile?.team_id, user_id_code: newCode, role });
     if (!error) fetchAllowedIds();
     setIsGenerating(false);
+  }
+
+  async function handleCreateCountry(e: React.FormEvent) {
+    e.preventDefault();
+    if (!countryName || !countryCode) return;
+    setIsCreatingCountry(true);
+    const { error } = await supabase.from('countries').insert({ name: countryName, code: countryCode });
+    if (!error) {
+      setCountryName('');
+      setCountryCode('');
+      fetchCountries();
+    } else {
+      alert(error.message);
+    }
+    setIsCreatingCountry(false);
+  }
+
+  async function handleCreateTeam(e: React.FormEvent) {
+    e.preventDefault();
+    if (!teamName || !selectedCountryId) return;
+    setIsCreatingTeam(true);
+    const { error } = await supabase.from('teams').insert({ name: teamName, country_id: selectedCountryId, team_type: teamType });
+    if (!error) {
+      setTeamName('');
+      setSelectedCountryId('');
+      fetchTeams();
+    } else {
+      alert(error.message);
+    }
+    setIsCreatingTeam(false);
   }
 
   if (loading || profile?.role !== 'admin')
@@ -172,6 +230,60 @@ export default function Admin() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6">
+        <div className="card space-y-3">
+          <h3 className="text-[16px] font-bold flex items-center gap-2">
+            <Globe size={18} className="text-brand-primary" /> Manage Countries
+          </h3>
+          <form onSubmit={handleCreateCountry} className="flex flex-col sm:flex-row gap-2">
+            <input type="text" placeholder="Country Name" value={countryName} onChange={e => setCountryName(e.target.value)} className="input-field flex-1" required />
+            <input type="text" placeholder="Code (e.g. US)" value={countryCode} onChange={e => setCountryCode(e.target.value)} className="input-field w-full sm:w-24" required />
+            <button type="submit" disabled={isCreatingCountry} className="h-[44px] px-4 bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 shrink-0">
+              {isCreatingCountry ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />}
+            </button>
+          </form>
+          <div className="space-y-2 mt-4">
+            {countries.map(c => (
+              <div key={c.id} className="flex justify-between items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-surface-borderLight dark:border-surface-borderDark">
+                <span className="font-semibold text-[14px]">{c.name}</span>
+                <span className="text-[11px] font-mono bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded text-black dark:text-white">{c.code}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card space-y-3">
+          <h3 className="text-[16px] font-bold flex items-center gap-2">
+            <Users size={18} className="text-brand-primary" /> Manage Teams
+          </h3>
+          <form onSubmit={handleCreateTeam} className="space-y-3">
+            <input type="text" placeholder="Team Name" value={teamName} onChange={e => setTeamName(e.target.value)} className="input-field" required />
+            <select value={selectedCountryId} onChange={e => setSelectedCountryId(e.target.value)} className="input-field" required>
+              <option value="">Select a country</option>
+              {countries.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
+            </select>
+            <div>
+              <label className="block text-[12px] font-semibold mb-1.5 ml-1 text-text-secondaryLight dark:text-text-secondaryDark">Team Type</label>
+              <SegmentedControl<TeamType> group="teamType" value={teamType} onChange={setTeamType} options={[{label: 'Sales', value: 'sales'}, {label: 'Dev', value: 'dev'}, {label: 'Mixed', value: 'mixed'}]} />
+            </div>
+            <button type="submit" disabled={isCreatingTeam} className="w-full h-[44px] bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 disabled:pointer-events-none">
+              {isCreatingTeam ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />} Create Team
+            </button>
+          </form>
+          <div className="space-y-2 mt-4">
+            {teams.map(t => (
+              <div key={t.id} className="flex justify-between items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-surface-borderLight dark:border-surface-borderDark">
+                <div>
+                  <p className="font-semibold text-[14px]">{t.name}</p>
+                  <p className="text-[11px] text-text-secondaryLight dark:text-text-secondaryDark">{t.countries?.name || 'No country'}</p>
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-wider bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded">{t.team_type}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
