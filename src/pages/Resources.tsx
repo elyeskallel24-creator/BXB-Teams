@@ -1,8 +1,9 @@
 ﻿import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, FileText, Plus, Search, Eye, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Loader2, FileText, Search, Eye, Bookmark, BookmarkCheck } from 'lucide-react';
 import { BottomSheet } from '../components/BottomSheet';
+import { PremiumPlusButton } from '../components/PremiumPlusButton';
 
 type Resource = { id: string; title: string; description: string; category: string; file_path: string; file_size: number; created_at: string; };
 
@@ -90,7 +91,7 @@ export default function Resources() {
     <div className="animate-enter">
       <div className="flex justify-between items-center mb-4">
         <h1 className="page-title mb-0">Resources</h1>
-        {profile?.role === 'admin' && <button onClick={() => setShowSheet(true)} className="hidden md:flex btn-primary"><Plus size={18} /> Upload</button>}
+        {profile?.role === 'admin' && <PremiumPlusButton onClick={() => setShowSheet(true)}>Upload</PremiumPlusButton>}
       </div>
 
       <div className="space-y-3 mb-5">
@@ -142,11 +143,7 @@ export default function Resources() {
         </div>
       )}
 
-      {profile?.role === 'admin' && (
-        <button onClick={() => setShowSheet(true)} className="md:hidden fixed bottom-[calc(60px+16px+env(safe-area-inset-bottom,20px))] right-4 w-[52px] h-[52px] bg-brand-primary text-black rounded-full shadow-float flex items-center justify-center z-40 active:scale-95 transition-transform">
-          <Plus size={24} />
-        </button>
-      )}
+      {profile?.role === 'admin' && <PremiumPlusButton isFloating onClick={() => setShowSheet(true)} />}
 
       <BottomSheet isOpen={showSheet} onClose={() => setShowSheet(false)} title="Upload Resource">
         <form onSubmit={handleUpload} className="space-y-4">

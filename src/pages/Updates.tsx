@@ -1,8 +1,9 @@
 ﻿import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, MessageSquare, Plus, Eye } from 'lucide-react';
+import { Loader2, MessageSquare } from 'lucide-react';
 import { BottomSheet } from '../components/BottomSheet';
+import { PremiumPlusButton } from '../components/PremiumPlusButton';
 
 type Update = { id: string; title: string; content: string; tag: string | null; image_url: string | null; created_at: string; profiles: { username: string; avatar_url: string }; };
 
@@ -23,7 +24,6 @@ export default function Updates() {
   const [content, setContent] = useState('');
   const [tag, setTag] = useState('Announcement');
   const [isPosting, setIsPosting] = useState(false);
-  const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchUpdates();
@@ -33,20 +33,7 @@ export default function Updates() {
 
   async function fetchUpdates() {
     const { data, error } = await supabase.from('updates').select('id, title, content, tag, image_url, created_at, profiles (username, avatar_url)').order('created_at', { ascending: false });
-    if (!error && data) {
-      setUpdates(data as any);
-      const ids = data.map(u => u.id);
-      
-      if (profile?.role === 'admin') {
-        const { data: views } = await supabase.from('update_views').select('update_id');
-        if (views) {
-          const counts = views.reduce((acc: any, v: any) => { acc[v.update_id] = (acc[v.update_id] || 0) + 1; return acc; }, {});
-          setViewCounts(counts);
-        }
-      } else if (ids.length > 0) {
-        supabase.rpc('log_views', { p_update_ids: ids }).then();
-      }
-    }
+    if (!error && data) setUpdates(data as any);
     setLoading(false);
   }
 
@@ -78,7 +65,7 @@ export default function Updates() {
     <div className="animate-enter">
       <div className="flex justify-between items-center mb-4">
         <h1 className="page-title mb-0">Updates</h1>
-        {profile?.role === 'admin' && <button onClick={() => setShowSheet(true)} className="hidden md:flex btn-primary"><Plus size={18} /> Post</button>}
+        {profile?.role === 'admin' && <PremiumPlusButton onClick={() => setShowSheet(true)}>Post</PremiumPlusButton>}
       </div>
 
       {updates.length === 0 ? (
@@ -103,14 +90,7 @@ export default function Updates() {
                           <p className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark">{new Date(update.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1.5">
-                        {update.tag && <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md tracking-wide uppercase ${tagColors[update.tag] || tagColors.Announcement}`}>{update.tag}</span>}
-                        {profile?.role === 'admin' && (
-                          <span className="text-[11px] font-medium text-text-secondaryLight dark:text-text-secondaryDark flex items-center gap-1">
-                            <Eye size={12} /> {viewCounts[update.id] || 0} views
-                          </span>
-                        )}
-                      </div>
+                      {update.tag && <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md tracking-wide uppercase ${tagColors[update.tag] || tagColors.Announcement}`}>{update.tag}</span>}
                     </div>
                     <h2 className="text-[17px] font-semibold mb-1.5 leading-snug">{update.title}</h2>
                     <p className="text-[15px] text-text-secondaryLight dark:text-text-secondaryDark leading-relaxed whitespace-pre-wrap">{update.content}</p>
@@ -123,11 +103,7 @@ export default function Updates() {
         </div>
       )}
 
-      {profile?.role === 'admin' && (
-        <button onClick={() => setShowSheet(true)} className="md:hidden fixed bottom-[calc(60px+16px+env(safe-area-inset-bottom,20px))] right-4 w-[52px] h-[52px] bg-brand-primary text-black rounded-full shadow-float flex items-center justify-center z-40 active:scale-95 transition-transform">
-          <Plus size={24} />
-        </button>
-      )}
+      {profile?.role === 'admin' && <PremiumPlusButton isFloating onClick={() => setShowSheet(true)} />}
 
       <BottomSheet isOpen={showSheet} onClose={() => setShowSheet(false)} title="Post Update">
         <form onSubmit={handlePost} className="space-y-4">

@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, Plus, UserCheck, Shield } from 'lucide-react';
+import { Loader2, UserCheck, Shield } from 'lucide-react';
+import { PremiumPlusButton } from '../components/PremiumPlusButton';
 
 type AllowedId = { id: string; user_id_code: string; role: string; is_used: boolean; created_at: string; };
 
@@ -51,9 +52,7 @@ export default function Admin() {
               <option value="member">Member</option>
               <option value="admin">Admin</option>
             </select>
-            <button type="submit" disabled={isGenerating} className="btn-primary">
-              {isGenerating ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />} Generate
-            </button>
+            <PremiumPlusButton type="submit" isLoading={isGenerating}>Generate</PremiumPlusButton>
           </form>
         </div>
 
