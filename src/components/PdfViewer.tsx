@@ -67,7 +67,9 @@ const LazyPage = memo(({ pageNumber, width, scale, aspectRatio }: { pageNumber: 
   );
 });
 
-export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string, title: string, onClose: () => void }) {
+const PdfViewer = memo(function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string, title: string, onClose: () => void }) {
+  console.log("🔄 PdfViewer RENDERED", { fileUrl, title });
+  
   const [numPages, setNumPages] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
@@ -122,6 +124,8 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
 
   useEffect(() => {
     if (!containerRef.current || !numPages) return;
+    console.log("👁️ Page Observer RECREATED", { numPages, scale, pdfWidth });
+    
     const observer = new IntersectionObserver((entries) => {
       let maxRatio = 0;
       let page = currentPage;
@@ -150,6 +154,7 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
   }, []);
 
   const handleLoadSuccess = useCallback((pdf: PDFDocumentProxy) => {
+    console.log("✅ PDF LOAD SUCCESS, pages:", pdf.numPages);
     setNumPages(pdf.numPages);
     pdf.getPage(1).then((page: any) => {
       const viewport = page.getViewport({ scale: 1 });
@@ -244,4 +249,6 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
   );
 
   return createPortal(content, document.body);
-}
+});
+
+export default PdfViewer;
