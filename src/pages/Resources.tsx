@@ -120,8 +120,11 @@ export default function Resources() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="text-[16px] font-semibold tracking-tight mb-0.5 truncate">{res.title}</h3>
-                    <button onClick={(e) => toggleSave(res.id, e)} className="p-1.5 shrink-0 text-text-secondaryLight dark:text-text-secondaryDark hover:text-brand-primary transition">
-                      {savedIds.has(res.id) ? <BookmarkCheck size={18} className="text-brand-primary" /> : <Bookmark size={18} />}
+                    <button 
+                      onClick={(e) => toggleSave(res.id, e)} 
+                      className={`w-11 h-11 flex items-center justify-center shrink-0 rounded-lg -mt-1 active:scale-90 transition-all duration-100 ${savedIds.has(res.id) ? 'text-brand-primary' : 'text-text-secondaryLight dark:text-text-secondaryDark hover:text-brand-primary'}`}
+                    >
+                      {savedIds.has(res.id) ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
                     </button>
                   </div>
                   {res.description && <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark mb-1.5 line-clamp-2">{res.description}</p>}
