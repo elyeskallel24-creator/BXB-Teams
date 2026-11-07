@@ -26,7 +26,7 @@ export default function Profile() {
       const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/webp', 0.8));
       if (!blob) throw new Error("Failed to process image");
 
-      const filePath = profile!.id + '.webp';
+      const filePath = profile!.id + '/avatar.webp';
       const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, blob, { upsert: true });
       if (uploadError) throw uploadError;
 
