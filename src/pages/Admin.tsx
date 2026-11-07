@@ -1,6 +1,6 @@
-﻿import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Loader2, UserCheck, Shield, Plus, Globe, Users } from 'lucide-react';
+﻿import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, UserCheck, Shield, Plus, Globe, Users, ChevronDown, Check } from 'lucide-react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,6 +10,22 @@ type RoleType = 'member' | 'admin';
 type TeamType = 'sales' | 'dev' | 'mixed';
 type Country = { id: string; name: string; code: string; };
 type Team = { id: string; name: string; team_type: string; countries: { name: string } | null; };
+
+const FLAG_MAP: Record<string, string> = {
+  US: '🇺🇸', FR: '🇫🇷', DE: '🇩🇪', GB: '🇬🇧', CA: '🇨🇦', AU: '🇦🇺',
+  JP: '🇯🇵', CN: '🇨🇳', IN: '🇮🇳', BR: '🇧🇷', MX: '🇲🇽', ES: '🇪🇸',
+  IT: '🇮🇹', NL: '🇳🇱', BE: '🇧🇪', CH: '🇨🇭', SE: '🇸🇪', NO: '🇳🇴',
+  DK: '🇩🇰', FI: '🇫🇮', IE: '🇮🇪', PT: '🇵🇹', PL: '🇵🇱', AT: '🇦🇹',
+  GR: '🇬🇷', TR: '🇹🇷', RU: '🇷🇺', UA: '🇺🇦', ZA: '🇿🇦', EG: '🇪🇬',
+  NG: '🇳🇬', KE: '🇰🇪', MA: '🇲🇦', TN: '🇹🇳', DZ: '🇩🇿', SA: '🇸🇦',
+  AE: '🇦🇪', IL: '🇮🇱', KR: '🇰🇷', SG: '🇸🇬', MY: '🇲🇾', TH: '🇹🇭',
+  ID: '🇮🇩', PH: '🇵🇭', VN: '🇻🇳', NZ: '🇳🇿', AR: '🇦🇷', CL: '🇨🇱',
+  CO: '🇨🇴', PE: '🇵🇪', VE: '🇻🇪',
+};
+
+function getFlag(code: string): string {
+  return FLAG_MAP[code.toUpperCase()] || '🌍';
+}
 
 function SegmentedControl<T extends string>({
   group,
@@ -43,6 +59,90 @@ function SegmentedControl<T extends string>({
           <span className="relative z-10">{opt.label}</span>
         </button>
       ))}
+    </div>
+  );
+}
+
+function CountrySelect({
+  countries,
+  value,
+  onChange,
+}: {
+  countries: Country[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = countries.find((c) => c.id === value);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    }
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full h-[44px] px-3 bg-transparent border border-surface-borderLight dark:border-surface-borderDark rounded-xl flex items-center justify-between text-[15px] text-text-primaryLight dark:text-text-primaryDark hover:border-brand-primary/50 transition-colors"
+      >
+        <span className="flex items-center gap-2 truncate">
+          {selected ? (
+            <>
+              <span className="text-[18px]">{getFlag(selected.code)}</span>
+              <span>{selected.name}</span>
+              <span className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark">({selected.code})</span>
+            </>
+          ) : (
+            <span className="text-text-secondaryLight dark:text-text-secondaryDark">Select a country</span>
+          )}
+        </span>
+        <ChevronDown size={18} className={`shrink-0 text-text-secondaryLight dark:text-text-secondaryDark transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-0 right-0 mt-1 bg-surface-cardLight dark:bg-surface-cardDark border border-surface-borderLight dark:border-surface-borderDark rounded-xl shadow-float z-50 max-h-64 overflow-y-auto"
+          >
+            {countries.length === 0 ? (
+              <div className="px-4 py-3 text-[13px] text-text-secondaryLight dark:text-text-secondaryDark">
+                No countries yet. Create one first.
+              </div>
+            ) : (
+              countries.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => {
+                    onChange(c.id);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2 px-3 py-2.5 text-left text-[14px] transition-colors ${
+                    c.id === value
+                      ? 'bg-brand-primary/10 text-brand-primary font-semibold'
+                      : 'hover:bg-black/5 dark:hover:bg-white/5 text-text-primaryLight dark:text-text-primaryDark'
+                  }`}
+                >
+                  <span className="text-[18px]">{getFlag(c.code)}</span>
+                  <span className="flex-1 truncate">{c.name}</span>
+                  <span className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark font-mono">{c.code}</span>
+                  {c.id === value && <Check size={16} className="text-brand-primary shrink-0" />}
+                </button>
+              ))
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -110,7 +210,7 @@ export default function Admin() {
     e.preventDefault();
     if (!countryName || !countryCode) return;
     setIsCreatingCountry(true);
-    const { error } = await supabase.from('countries').insert({ name: countryName, code: countryCode });
+    const { error } = await supabase.from('countries').insert({ name: countryName, code: countryCode.toUpperCase() });
     if (!error) {
       setCountryName('');
       setCountryCode('');
@@ -240,15 +340,21 @@ export default function Admin() {
           </h3>
           <form onSubmit={handleCreateCountry} className="flex flex-col sm:flex-row gap-2">
             <input type="text" placeholder="Country Name" value={countryName} onChange={e => setCountryName(e.target.value)} className="input-field flex-1" required />
-            <input type="text" placeholder="Code (e.g. US)" value={countryCode} onChange={e => setCountryCode(e.target.value)} className="input-field w-full sm:w-24" required />
+            <input type="text" placeholder="Code (e.g. US)" value={countryCode} onChange={e => setCountryCode(e.target.value)} className="input-field w-full sm:w-24" required maxLength={3} />
             <button type="submit" disabled={isCreatingCountry} className="h-[44px] px-4 bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 shrink-0">
               {isCreatingCountry ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />}
             </button>
           </form>
           <div className="space-y-2 mt-4">
+            {countries.length === 0 && (
+              <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark text-center py-2">No countries yet.</p>
+            )}
             {countries.map(c => (
               <div key={c.id} className="flex justify-between items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-surface-borderLight dark:border-surface-borderDark">
-                <span className="font-semibold text-[14px]">{c.name}</span>
+                <span className="flex items-center gap-2 font-semibold text-[14px]">
+                  <span className="text-[18px]">{getFlag(c.code)}</span>
+                  {c.name}
+                </span>
                 <span className="text-[11px] font-mono bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded text-black dark:text-white">{c.code}</span>
               </div>
             ))}
@@ -261,10 +367,7 @@ export default function Admin() {
           </h3>
           <form onSubmit={handleCreateTeam} className="space-y-3">
             <input type="text" placeholder="Team Name" value={teamName} onChange={e => setTeamName(e.target.value)} className="input-field" required />
-            <select value={selectedCountryId} onChange={e => setSelectedCountryId(e.target.value)} className="input-field" required>
-              <option value="">Select a country</option>
-              {countries.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
-            </select>
+            <CountrySelect countries={countries} value={selectedCountryId} onChange={setSelectedCountryId} />
             <div>
               <label className="block text-[12px] font-semibold mb-1.5 ml-1 text-text-secondaryLight dark:text-text-secondaryDark">Team Type</label>
               <SegmentedControl<TeamType> group="teamType" value={teamType} onChange={setTeamType} options={[{label: 'Sales', value: 'sales'}, {label: 'Dev', value: 'dev'}, {label: 'Mixed', value: 'mixed'}]} />
@@ -274,6 +377,9 @@ export default function Admin() {
             </button>
           </form>
           <div className="space-y-2 mt-4">
+            {teams.length === 0 && (
+              <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark text-center py-2">No teams yet.</p>
+            )}
             {teams.map(t => (
               <div key={t.id} className="flex justify-between items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-surface-borderLight dark:border-surface-borderDark">
                 <div>
