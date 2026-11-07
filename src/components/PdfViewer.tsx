@@ -29,17 +29,24 @@ function useIntersectionObserver(options: IntersectionObserverInit) {
   return [ref, isIntersecting] as const;
 }
 
-const LazyPage = memo(({ pageNumber, width, scale, aspectRatio }: { pageNumber: number, width: number, scale: number, aspectRatio: number | null }) => {
+const LazyPage = memo(({ pageNumber, width, scale, aspectRatio }: { pageNumber: number, width: number, scale: number, aspectRatio: number }) => {
   const [ref, inView] = useIntersectionObserver(observerOptions);
-  const height = width * scale * (aspectRatio || 1.414);
+  const [hasRendered, setHasRendered] = useState(false);
+  
+  const finalWidth = width * scale;
+  const finalHeight = finalWidth * aspectRatio;
 
   useEffect(() => {
     if (inView) console.log(`Page ${pageNumber} rendered`);
   }, [inView, pageNumber]);
 
   return (
-    <div ref={ref} className="flex justify-center w-full" style={{ height: inView ? 'auto' : height }}>
-      {inView ? (
+    <div 
+      ref={ref} 
+      className="flex justify-center w-full relative" 
+      style={{ height: finalHeight, width: finalWidth, overflow: 'hidden' }}
+    >
+      {inView && (
         <Page 
           pageNumber={pageNumber} 
           width={width} 
@@ -48,9 +55,15 @@ const LazyPage = memo(({ pageNumber, width, scale, aspectRatio }: { pageNumber: 
           renderTextLayer={false}
           devicePixelRatio={pixelRatio}
           className="shadow-2xl bg-white"
+          onRenderSuccess={() => setHasRendered(true)}
+          loading={<div style={{ width: finalWidth, height: finalHeight }} />}
         />
-      ) : (
-        <div className="bg-white/10 animate-pulse rounded-lg" style={{ width: width * scale, height: height }} />
+      )}
+      {!hasRendered && (
+        <div 
+          className="bg-white/10 animate-pulse rounded-lg absolute inset-0" 
+          style={{ width: finalWidth, height: finalHeight }} 
+        />
       )}
     </div>
   );
@@ -60,7 +73,7 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
   const [numPages, setNumPages] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
-  const [containerWidth, setContainerWidth] = useState<number>();
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const [scale, setScale] = useState(1);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -104,7 +117,7 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
         const newWidth = entries[0].contentRect.width;
         if (newWidth > 0) {
           setContainerWidth(prev => {
-            if (!prev || Math.abs(prev - newWidth) >= 4) {
+            if (prev === null || Math.abs(prev - newWidth) >= 4) {
               console.log(`width changed to ${newWidth}`);
               return newWidth;
             }
@@ -139,7 +152,8 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
     setError(true);
   }, []);
 
-  const basePdfWidth = containerWidth ? Math.min(containerWidth - 24, 1000) : 300;
+  const ready = containerWidth !== null && aspectRatio !== null;
+  const basePdfWidth = containerWidth ? Math.min(containerWidth - 24, 1000) : 0;
   
   const content = (
     <motion.div 
@@ -163,7 +177,12 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
         </div>
       </div>
 
-      <div ref={containerRef} onWheel={handleWheel} className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center py-6 gap-3 bg-[#1A1A1A] relative">
+      <div 
+        ref={containerRef} 
+        onWheel={handleWheel} 
+        className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center py-6 gap-3 bg-[#1A1A1A] relative"
+        style={{ overflowAnchor: 'none' }}
+      >
         {error || timedOut ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
             <p className="text-white/70 mb-4">Sorry, we couldn't load the preview.</p>
@@ -183,13 +202,13 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
               </div>
             }
           >
-            {numPages && Array.from(new Array(numPages), (_, index) => (
+            {ready && numPages && Array.from(new Array(numPages), (_, index) => (
               <LazyPage 
                 key={`page_${index + 1}`} 
                 pageNumber={index + 1} 
                 width={basePdfWidth} 
                 scale={scale} 
-                aspectRatio={aspectRatio}
+                aspectRatio={aspectRatio!}
               />
             ))}
           </Document>
