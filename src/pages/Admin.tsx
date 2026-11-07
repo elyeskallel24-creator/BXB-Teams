@@ -1,8 +1,9 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, UserCheck, Shield, Plus, Users, ChevronDown, Check } from 'lucide-react';
+import { Loader2, UserCheck, Shield, Plus, Users, ChevronDown, Check, Globe } from 'lucide-react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
+import { BottomSheet } from '../components/BottomSheet';
 
 type AllowedId = { id: string; user_id_code: string; role: string; is_used: boolean; created_at: string; };
 type IdType = 'SALES' | 'DEV';
@@ -116,7 +117,7 @@ function CountrySelect({
           >
             {countries.length === 0 ? (
               <div className="px-4 py-3 text-[13px] text-text-secondaryLight dark:text-text-secondaryDark">
-                No countries available.
+                No countries yet. Add one first.
               </div>
             ) : (
               countries.map((c) => (
@@ -161,6 +162,11 @@ export default function Admin() {
   const [selectedCountryId, setSelectedCountryId] = useState('');
   const [teamType, setTeamType] = useState<TeamType>('sales');
   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+
+  const [showCountrySheet, setShowCountrySheet] = useState(false);
+  const [newCountryName, setNewCountryName] = useState('');
+  const [newCountryCode, setNewCountryCode] = useState('');
+  const [isAddingCountry, setIsAddingCountry] = useState(false);
 
   useEffect(() => {
     if (profile?.role === 'admin') {
@@ -215,6 +221,25 @@ export default function Admin() {
       alert(error.message);
     }
     setIsCreatingTeam(false);
+  }
+
+  async function handleAddCountry(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCountryName || !newCountryCode) return;
+    setIsAddingCountry(true);
+    const { error } = await supabase.from('countries').insert({
+      name: newCountryName.trim(),
+      code: newCountryCode.trim().toUpperCase(),
+    });
+    if (!error) {
+      setNewCountryName('');
+      setNewCountryCode('');
+      setShowCountrySheet(false);
+      fetchCountries();
+    } else {
+      alert(error.message);
+    }
+    setIsAddingCountry(false);
   }
 
   if (loading || profile?.role !== 'admin')
@@ -315,9 +340,20 @@ export default function Admin() {
       </div>
 
       <div className="card space-y-3 mt-6">
-        <h3 className="text-[16px] font-bold flex items-center gap-2">
-          <Users size={18} className="text-brand-primary" /> Manage Teams
-        </h3>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-[16px] font-bold flex items-center gap-2">
+            <Users size={18} className="text-brand-primary" /> Manage Teams
+          </h3>
+          <button
+            type="button"
+            onClick={() => setShowCountrySheet(true)}
+            className="h-9 px-3 bg-brand-primary/10 text-brand-primary rounded-lg text-[12px] font-bold flex items-center gap-1.5 active:scale-95 transition-transform shrink-0"
+          >
+            <Globe size={14} strokeWidth={2.5} />
+            Add Country
+          </button>
+        </div>
+
         <form onSubmit={handleCreateTeam} className="space-y-3">
           <input type="text" placeholder="Team Name" value={teamName} onChange={e => setTeamName(e.target.value)} className="input-field" required />
           <CountrySelect countries={countries} value={selectedCountryId} onChange={setSelectedCountryId} />
@@ -344,6 +380,36 @@ export default function Admin() {
           ))}
         </div>
       </div>
+
+      <BottomSheet isOpen={showCountrySheet} onClose={() => setShowCountrySheet(false)} title="Add Country">
+        <form onSubmit={handleAddCountry} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Country Name"
+            value={newCountryName}
+            onChange={e => setNewCountryName(e.target.value)}
+            className="input-field"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Country Code (e.g. US)"
+            value={newCountryCode}
+            onChange={e => setNewCountryCode(e.target.value)}
+            className="input-field"
+            maxLength={3}
+            required
+          />
+          <button
+            type="submit"
+            disabled={isAddingCountry}
+            className="w-full h-[44px] bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 disabled:pointer-events-none"
+          >
+            {isAddingCountry ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />}
+            Save Country
+          </button>
+        </form>
+      </BottomSheet>
     </div>
   );
 }
