@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+﻿import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -7,6 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: { globIgnores: ['**/pdf.worker*'] },
       includeAssets: ['logo.webp', 'favicon.svg'],
       manifest: {
         name: 'BXB Team',
@@ -30,3 +31,4 @@ export default defineConfig({
     })
   ],
 })
+

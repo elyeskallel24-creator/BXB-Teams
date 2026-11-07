@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useRef, memo } from 'react';
+﻿import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import type { WheelEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -11,7 +11,7 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
-const observerOptions = { rootMargin: '400px' };
+const observerOptions = { rootMargin: '200px' };
 const pixelRatio = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1;
 
 function useIntersectionObserver(options: IntersectionObserverInit) {
@@ -37,15 +37,12 @@ const LazyPage = memo(({ pageNumber, width, scale, aspectRatio }: { pageNumber: 
   const finalWidth = width * scale;
   const finalHeight = finalWidth * aspectRatio;
 
-  useEffect(() => {
-    if (inView) console.log(`Page ${pageNumber} rendered`);
-  }, [inView, pageNumber]);
-
   return (
     <div 
       ref={ref} 
-      className="flex justify-center w-full relative" 
-      style={{ height: finalHeight, width: finalWidth, overflow: 'hidden' }}
+      data-page={pageNumber}
+      className="pdf-page-wrapper flex justify-center w-full shrink-0 relative" 
+      style={{ height: finalHeight, minHeight: finalHeight, width: finalWidth, flexShrink: 0, overflow: 'hidden' }}
     >
       {inView && (
         <Page 
@@ -55,14 +52,14 @@ const LazyPage = memo(({ pageNumber, width, scale, aspectRatio }: { pageNumber: 
           renderAnnotationLayer={false}
           renderTextLayer={false}
           devicePixelRatio={pixelRatio}
-          className="shadow-2xl bg-white"
+          className="border border-white/10"
           onRenderSuccess={() => setHasRendered(true)}
           loading={<div style={{ width: finalWidth, height: finalHeight }} />}
         />
       )}
       {!hasRendered && (
         <div 
-          className="bg-white/10 animate-pulse rounded-lg absolute inset-0" 
+          className="bg-white/5 absolute inset-0" 
           style={{ width: finalWidth, height: finalHeight }} 
         />
       )}
@@ -77,16 +74,15 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
   const [pdfWidth, setPdfWidth] = useState(() => Math.min(window.innerWidth - 40, 1000));
   const [scale, setScale] = useState(1);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showPill, setShowPill] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
+  const pillTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
-
-  useEffect(() => {
-    console.log('PdfViewer MOUNTED');
-    return () => console.log('PdfViewer UNMOUNTED');
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -115,9 +111,7 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
       timeoutId = setTimeout(() => {
         if (Math.abs(window.innerWidth - lastWidth) >= 100) {
           lastWidth = window.innerWidth;
-          const newW = Math.min(lastWidth - 40, 1000);
-          console.log(`width changed to ${newW}`);
-          setPdfWidth(newW);
+          setPdfWidth(Math.min(lastWidth - 40, 1000));
         }
       }, 300);
     };
@@ -125,6 +119,28 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
     window.addEventListener('resize', handleResize);
     return () => { window.removeEventListener('resize', handleResize); clearTimeout(timeoutId); };
   }, []);
+
+  useEffect(() => {
+    if (!containerRef.current || !numPages) return;
+    const observer = new IntersectionObserver((entries) => {
+      let maxRatio = 0;
+      let page = currentPage;
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+          maxRatio = entry.intersectionRatio;
+          page = Number(entry.target.getAttribute('data-page'));
+        }
+      });
+      if (maxRatio > 0) {
+         setCurrentPage(prev => prev !== page ? page : prev);
+      }
+    }, { root: containerRef.current, threshold: [0, 0.1, 0.5, 1] });
+
+    const pages = containerRef.current.querySelectorAll('.pdf-page-wrapper');
+    pages.forEach(p => observer.observe(p));
+
+    return () => observer.disconnect();
+  }, [numPages, scale, pdfWidth]);
 
   const handleWheel = useCallback((e: WheelEvent) => {
     if (e.ctrlKey) {
@@ -134,7 +150,6 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
   }, []);
 
   const handleLoadSuccess = useCallback((pdf: PDFDocumentProxy) => {
-    console.log('Document loaded');
     setNumPages(pdf.numPages);
     pdf.getPage(1).then((page: any) => {
       const viewport = page.getViewport({ scale: 1 });
@@ -142,10 +157,20 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
     });
   }, []);
 
-  const handleError = useCallback((err: any) => {
-    console.error("PDF Load Error:", err);
+  const handleError = useCallback(() => {
     setError(true);
   }, []);
+
+  const handleScroll = useCallback(() => {
+    setShowPill(true);
+    if (pillTimeoutRef.current) clearTimeout(pillTimeoutRef.current);
+    pillTimeoutRef.current = setTimeout(() => setShowPill(false), 1500);
+  }, []);
+
+  useEffect(() => {
+    handleScroll();
+    return () => clearTimeout(pillTimeoutRef.current);
+  }, [handleScroll]);
 
   const ready = aspectRatio !== null;
   
@@ -172,9 +197,11 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
       </div>
 
       <div 
+        ref={containerRef}
         className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center py-6 gap-3 bg-[#1A1A1A] relative"
         style={{ scrollbarGutter: 'stable', overflowAnchor: 'none' }}
         onWheel={handleWheel} 
+        onScroll={handleScroll}
       >
         {error || timedOut ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-6">
@@ -209,8 +236,8 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
       </div>
       
       {numPages && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-white text-xs font-semibold pointer-events-none z-10">
-          Scroll to read &bull; {numPages} pages
+        <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/80 px-4 py-2 rounded-full text-white text-xs font-semibold pointer-events-none z-10 transition-opacity duration-300 ${showPill ? 'opacity-100' : 'opacity-0'}`}>
+          {currentPage} / {numPages}
         </div>
       )}
     </motion.div>
@@ -218,5 +245,3 @@ export default function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string
 
   return createPortal(content, document.body);
 }
-
-
