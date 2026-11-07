@@ -68,8 +68,6 @@ const LazyPage = memo(({ pageNumber, width, scale, aspectRatio }: { pageNumber: 
 });
 
 const PdfViewer = memo(function PdfViewer({ fileUrl, title, onClose }: { fileUrl: string, title: string, onClose: () => void }) {
-  console.log("🔄 PdfViewer RENDERED", { fileUrl, title });
-  
   const [numPages, setNumPages] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
@@ -82,9 +80,7 @@ const PdfViewer = memo(function PdfViewer({ fileUrl, title, onClose }: { fileUrl
   const onCloseRef = useRef(onClose);
   const pillTimeoutRef = useRef<any>(null);
 
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -124,7 +120,6 @@ const PdfViewer = memo(function PdfViewer({ fileUrl, title, onClose }: { fileUrl
 
   useEffect(() => {
     if (!containerRef.current || !numPages) return;
-    console.log("👁️ Page Observer RECREATED", { numPages, scale, pdfWidth });
     
     const observer = new IntersectionObserver((entries) => {
       let maxRatio = 0;
@@ -144,7 +139,7 @@ const PdfViewer = memo(function PdfViewer({ fileUrl, title, onClose }: { fileUrl
     pages.forEach(p => observer.observe(p));
 
     return () => observer.disconnect();
-  }, [numPages, scale, pdfWidth]);
+  }, [numPages]);
 
   const handleWheel = useCallback((e: WheelEvent) => {
     if (e.ctrlKey) {
@@ -154,7 +149,6 @@ const PdfViewer = memo(function PdfViewer({ fileUrl, title, onClose }: { fileUrl
   }, []);
 
   const handleLoadSuccess = useCallback((pdf: PDFDocumentProxy) => {
-    console.log("✅ PDF LOAD SUCCESS, pages:", pdf.numPages);
     setNumPages(pdf.numPages);
     pdf.getPage(1).then((page: any) => {
       const viewport = page.getViewport({ scale: 1 });
@@ -175,7 +169,7 @@ const PdfViewer = memo(function PdfViewer({ fileUrl, title, onClose }: { fileUrl
   useEffect(() => {
     handleScroll();
     return () => clearTimeout(pillTimeoutRef.current);
-  }, [handleScroll]);
+  }, []);
 
   const ready = aspectRatio !== null;
   
