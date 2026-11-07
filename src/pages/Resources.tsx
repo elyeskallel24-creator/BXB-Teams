@@ -1,8 +1,19 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
+import { AnimatePresence } from 'framer-motion';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, FileText, Plus, X, Search, Eye, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Loader2, FileText, Plus, Search, Eye, Bookmark, BookmarkCheck } from 'lucide-react';
 import { BottomSheet } from '../components/BottomSheet';
+
+const PdfViewer = lazy(() => import('../components/PdfViewer'));
+
+const SuspenseFallback = () => createPortal(
+  <div className="fixed inset-0 bg-[#1A1A1A] z-[9999] flex items-center justify-center text-white">
+    <Loader2 className="animate-spin" size={32} />
+  </div>,
+  document.body
+);
 
 type Resource = { id: string; title: string; description: string; category: string; file_path: string; file_size: number; created_at: string; };
 
@@ -67,7 +78,10 @@ export default function Resources() {
 
   async function handleOpenPdf(filePath: string, title: string) {
     const { data, error } = await supabase.storage.from('resources').createSignedUrl(filePath, 300);
-    if (!error && data) { setViewingPdf(data.signedUrl); setPdfTitle(title); }
+    if (!error && data) { 
+      setViewingPdf(data.signedUrl); 
+      setPdfTitle(title); 
+    }
   }
 
   const categories = ['All', 'Saved', ...Array.from(new Set(resources.map(r => r.category)))];
@@ -122,7 +136,9 @@ export default function Resources() {
                   {res.description && <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark mb-1.5 line-clamp-2">{res.description}</p>}
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-medium text-text-secondaryLight dark:text-text-secondaryDark">
                     <span className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded text-black dark:text-white">{res.category}</span>
-                    <span>{(res.file_size / 1024 / 1024).toFixed(2)} MB</span><span>•</span><span>{new Date(res.created_at).toLocaleDateString()}</span>
+                    <span>{(res.file_size / 1024 / 1024).toFixed(2)} MB</span>
+                    <span className="text-[10px]">&bull;</span>
+                    <span>{new Date(res.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -148,15 +164,11 @@ export default function Resources() {
         </form>
       </BottomSheet>
 
-      {viewingPdf && (
-        <div className="fixed inset-0 z-[200] bg-black/95 flex flex-col animate-enter">
-          <div className="flex items-center justify-between p-4 bg-surface-dark text-white border-b border-white/10">
-            <h2 className="font-semibold text-[16px] truncate flex-1 mr-4 text-white">{pdfTitle}</h2>
-            <button onClick={() => setViewingPdf(null)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition text-white"><X size={20} /></button>
-          </div>
-          <iframe src={viewingPdf} className="flex-1 w-full border-0 bg-white" title="PDF Viewer" />
-        </div>
-      )}
+      <Suspense fallback={<SuspenseFallback />}>
+        <AnimatePresence>
+          {viewingPdf && <PdfViewer fileUrl={viewingPdf} title={pdfTitle} onClose={() => setViewingPdf(null)} />}
+        </AnimatePresence>
+      </Suspense>
     </div>
   );
 }
