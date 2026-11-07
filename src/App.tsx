@@ -1,11 +1,12 @@
 ﻿import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Home, FileText, User, LogOut, Shield, Moon, Sun, Loader2 } from 'lucide-react';
+import { Home, FileText, User, LogOut, Shield, Moon, Sun, Loader2, Trophy } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Updates from './pages/Updates';
 import Resources from './pages/Resources';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import Leaderboard from './pages/Leaderboard';
 import { useAuth } from './context/AuthContext';
 import { supabase } from './supabase';
 import { PWAPrompts } from './components/PWAPrompts';
@@ -28,6 +29,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { path: '/', icon: Home, label: 'Updates' },
     { path: '/resources', icon: FileText, label: 'Resources' },
+    { path: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
     ...(profile?.role === 'admin' ? [{ path: '/admin', icon: Shield, label: 'Admin' }] : []),
     { path: '/profile', icon: User, label: 'Profile' }
   ];
@@ -103,6 +105,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Updates />} />
           <Route path="/resources" element={<Resources />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<Navigate to="/" replace />} />
