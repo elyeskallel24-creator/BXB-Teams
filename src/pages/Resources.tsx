@@ -118,15 +118,7 @@ export default function Resources() {
               <div className="flex items-start gap-3 w-full">
                 <div className="w-10 h-10 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0"><FileText size={20} /></div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-[16px] font-semibold tracking-tight mb-0.5 truncate">{res.title}</h3>
-                    <button 
-                      onClick={(e) => toggleSave(res.id, e)} 
-                      className={`w-9 h-9 flex items-center justify-center shrink-0 rounded-lg active:scale-90 transition-all duration-100 ${savedIds.has(res.id) ? 'text-brand-primary' : 'text-text-secondaryLight dark:text-text-secondaryDark hover:text-brand-primary'}`}
-                    >
-                      {savedIds.has(res.id) ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
-                    </button>
-                  </div>
+                  <h3 className="text-[16px] font-semibold tracking-tight mb-0.5 truncate">{res.title}</h3>
                   {res.description && <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark mb-1.5 line-clamp-2">{res.description}</p>}
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] font-medium text-text-secondaryLight dark:text-text-secondaryDark">
                     <span className="bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded text-black dark:text-white">{res.category}</span>
@@ -136,7 +128,15 @@ export default function Resources() {
                   </div>
                 </div>
               </div>
-              <button onClick={() => handleOpenPdf(res.file_path)} className="btn-secondary sm:w-auto w-full shrink-0 group-hover:bg-brand-primary/5 group-hover:text-brand-primary group-hover:border-brand-primary/20"><Eye size={18} /> View</button>
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                <button 
+                  onClick={(e) => toggleSave(res.id, e)} 
+                  className={`w-9 h-9 flex items-center justify-center shrink-0 rounded-lg active:scale-90 transition-all duration-100 ${savedIds.has(res.id) ? 'text-brand-primary' : 'text-text-secondaryLight dark:text-text-secondaryDark hover:text-brand-primary'}`}
+                >
+                  {savedIds.has(res.id) ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+                </button>
+                <button onClick={() => handleOpenPdf(res.file_path)} className="btn-secondary flex-1 sm:flex-none sm:w-auto shrink-0 group-hover:bg-brand-primary/5 group-hover:text-brand-primary group-hover:border-brand-primary/20"><Eye size={18} /> View</button>
+              </div>
             </div>
           ))}
         </div>
