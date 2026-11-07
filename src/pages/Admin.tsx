@@ -9,7 +9,7 @@ type AllowedId = { id: string; user_id_code: string; role: string; is_used: bool
 type IdType = 'SALES' | 'DEV';
 type RoleType = 'member' | 'admin';
 type TeamType = 'sales' | 'dev' | 'mixed';
-type Country = { id: string; name: string; code: string; };
+type Country = { id: string; name: string; code: string; flag?: string | null; };
 type Team = { id: string; name: string; team_type: string; countries: { name: string } | null; };
 
 const FLAG_MAP: Record<string, string> = {
@@ -24,8 +24,16 @@ const FLAG_MAP: Record<string, string> = {
   CO: '🇨🇴', PE: '🇵🇪', VE: '🇻🇪',
 };
 
-function getFlag(code: string): string {
-  return FLAG_MAP[code.toUpperCase()] || '🌍';
+function codeToFlag(code: string): string {
+  if (!code || code.length !== 2) return '🌍';
+  const codePoints = code.toUpperCase().split('').map(char => 0x1F1E6 + char.charCodeAt(0) - 65);
+  return String.fromCodePoint(...codePoints);
+}
+
+function getFlag(c: Country): string {
+  if (c.flag) return c.flag;
+  if (FLAG_MAP[c.code.toUpperCase()]) return FLAG_MAP[c.code.toUpperCase()];
+  return codeToFlag(c.code);
 }
 
 function SegmentedControl<T extends string>({
@@ -95,7 +103,7 @@ function CountrySelect({
         <span className="flex items-center gap-2 truncate">
           {selected ? (
             <>
-              <span className="text-[18px]">{getFlag(selected.code)}</span>
+              <span className="text-[18px]">{getFlag(selected)}</span>
               <span>{selected.name}</span>
               <span className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark">({selected.code})</span>
             </>
@@ -134,7 +142,7 @@ function CountrySelect({
                       : 'hover:bg-black/5 dark:hover:bg-white/5 text-text-primaryLight dark:text-text-primaryDark'
                   }`}
                 >
-                  <span className="text-[18px]">{getFlag(c.code)}</span>
+                  <span className="text-[18px]">{getFlag(c)}</span>
                   <span className="flex-1 truncate">{c.name}</span>
                   <span className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark font-mono">{c.code}</span>
                   {c.id === value && <Check size={16} className="text-brand-primary shrink-0" />}
@@ -227,9 +235,12 @@ export default function Admin() {
     e.preventDefault();
     if (!newCountryName || !newCountryCode) return;
     setIsAddingCountry(true);
+    const code = newCountryCode.trim().toUpperCase();
+    const flag = codeToFlag(code);
     const { error } = await supabase.from('countries').insert({
       name: newCountryName.trim(),
-      code: newCountryCode.trim().toUpperCase(),
+      code: code,
+      flag: flag
     });
     if (!error) {
       setNewCountryName('');
