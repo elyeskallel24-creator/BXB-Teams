@@ -1,40 +1,17 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, UserCheck, Shield, Plus, Users, ChevronDown, Check, Globe } from 'lucide-react';
+import { Loader2, UserCheck, Shield, Plus, Users, ChevronDown, Check, Globe, Trophy } from 'lucide-react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { BottomSheet } from '../components/BottomSheet';
 
 type AllowedId = { id: string; user_id_code: string; role: string; is_used: boolean; created_at: string; };
+type Member = { id: string; username: string; points: number; avatar_url: string; };
 type IdType = 'SALES' | 'DEV';
 type RoleType = 'member' | 'admin';
 type TeamType = 'sales' | 'dev' | 'mixed';
 type Country = { id: string; name: string; code: string; flag?: string | null; };
 type Team = { id: string; name: string; team_type: string; countries: { name: string } | null; };
-
-const FLAG_MAP: Record<string, string> = {
-  US: '🇺🇸', FR: '🇫🇷', DE: '🇩🇪', GB: '🇬🇧', CA: '🇨🇦', AU: '🇦🇺',
-  JP: '🇯🇵', CN: '🇨🇳', IN: '🇮🇳', BR: '🇧🇷', MX: '🇲🇽', ES: '🇪🇸',
-  IT: '🇮🇹', NL: '🇳🇱', BE: '🇧🇪', CH: '🇨🇭', SE: '🇸🇪', NO: '🇳🇴',
-  DK: '🇩🇰', FI: '🇫🇮', IE: '🇮🇪', PT: '🇵🇹', PL: '🇵🇱', AT: '🇦🇹',
-  GR: '🇬🇷', TR: '🇹🇷', RU: '🇷🇺', UA: '🇺🇦', ZA: '🇿🇦', EG: '🇪🇬',
-  NG: '🇳🇬', KE: '🇰🇪', MA: '🇲🇦', TN: '🇹🇳', DZ: '🇩🇿', SA: '🇸🇦',
-  AE: '🇦🇪', IL: '🇮🇱', KR: '🇰🇷', SG: '🇸🇬', MY: '🇲🇾', TH: '🇹🇭',
-  ID: '🇮🇩', PH: '🇵🇭', VN: '🇻🇳', NZ: '🇳🇿', AR: '🇦🇷', CL: '🇨🇱',
-  CO: '🇨🇴', PE: '🇵🇪', VE: '🇻🇪',
-};
-
-function codeToFlag(code: string): string {
-  if (!code || code.length !== 2) return '🌍';
-  const codePoints = code.toUpperCase().split('').map(char => 0x1F1E6 + char.charCodeAt(0) - 65);
-  return String.fromCodePoint(...codePoints);
-}
-
-function getFlag(c: Country): string {
-  if (c.flag) return c.flag;
-  if (FLAG_MAP[c.code.toUpperCase()]) return FLAG_MAP[c.code.toUpperCase()];
-  return codeToFlag(c.code);
-}
 
 function SegmentedControl<T extends string>({
   group,
@@ -103,7 +80,7 @@ function CountrySelect({
         <span className="flex items-center gap-2 truncate">
           {selected ? (
             <>
-              <span className="text-[18px]">{getFlag(selected)}</span>
+              <span className="text-[18px]">{selected.flag || '🌍'}</span>
               <span>{selected.name}</span>
               <span className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark">({selected.code})</span>
             </>
@@ -142,7 +119,7 @@ function CountrySelect({
                       : 'hover:bg-black/5 dark:hover:bg-white/5 text-text-primaryLight dark:text-text-primaryDark'
                   }`}
                 >
-                  <span className="text-[18px]">{getFlag(c)}</span>
+                  <span className="text-[18px]">{c.flag || '🌍'}</span>
                   <span className="flex-1 truncate">{c.name}</span>
                   <span className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark font-mono">{c.code}</span>
                   {c.id === value && <Check size={16} className="text-brand-primary shrink-0" />}
@@ -159,12 +136,18 @@ function CountrySelect({
 export default function Admin() {
   const { profile } = useAuth();
   const [allowedIds, setAllowedIds] = useState<AllowedId[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
+  
   const [idType, setIdType] = useState<IdType>('SALES');
   const [role, setRole] = useState<RoleType>('member');
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const [selectedMember, setSelectedMember] = useState('');
+  const [pointsToAdd, setPointsToAdd] = useState<number | ''>('');
+  const [isAwarding, setIsAwarding] = useState(false);
 
   const [teamName, setTeamName] = useState('');
   const [selectedCountryId, setSelectedCountryId] = useState('');
@@ -179,6 +162,7 @@ export default function Admin() {
   useEffect(() => {
     if (profile?.role === 'admin') {
       fetchAllowedIds();
+      fetchMembers();
       fetchCountries();
       fetchTeams();
     }
@@ -188,6 +172,11 @@ export default function Admin() {
     const { data } = await supabase.from('allowed_user_ids').select('*').order('created_at', { ascending: false });
     if (data) setAllowedIds(data);
     setLoading(false);
+  }
+
+  async function fetchMembers() {
+    const { data } = await supabase.from('profiles').select('id, username, points, avatar_url').eq('role', 'member').order('username');
+    if (data) setMembers(data);
   }
 
   async function fetchCountries() {
@@ -204,16 +193,27 @@ export default function Admin() {
     e.preventDefault();
     setIsGenerating(true);
     const sameTypeIds = allowedIds.filter((a) => a.user_id_code.startsWith(idType + '-'));
-    const nextNumber =
-      sameTypeIds.length > 0
-        ? Math.max(...sameTypeIds.map((id) => parseInt(id.user_id_code.split('-')[1]) || 0)) + 1
-        : 1;
+    const nextNumber = sameTypeIds.length > 0 ? Math.max(...sameTypeIds.map((id) => parseInt(id.user_id_code.split('-')[1]) || 0)) + 1 : 1;
     const newCode = idType + '-' + nextNumber.toString().padStart(4, '0');
-    const { error } = await supabase
-      .from('allowed_user_ids')
-      .insert({ team_id: profile?.team_id, user_id_code: newCode, role });
+    const { error } = await supabase.from('allowed_user_ids').insert({ team_id: profile?.team_id, user_id_code: newCode, role });
     if (!error) fetchAllowedIds();
     setIsGenerating(false);
+  }
+
+  async function handleAwardPoints(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedMember || !pointsToAdd) return;
+    setIsAwarding(true);
+    const { error } = await supabase.rpc('award_points', { target_user_id: selectedMember, amount: pointsToAdd });
+    if (!error) {
+      setSelectedMember('');
+      setPointsToAdd('');
+      fetchMembers();
+      alert('Points awarded successfully!');
+    } else {
+      alert(error.message);
+    }
+    setIsAwarding(false);
   }
 
   async function handleCreateTeam(e: React.FormEvent) {
@@ -236,12 +236,9 @@ export default function Admin() {
     if (!newCountryName || !newCountryCode) return;
     setIsAddingCountry(true);
     const code = newCountryCode.trim().toUpperCase();
-    const flag = codeToFlag(code);
-    const { error } = await supabase.from('countries').insert({
-      name: newCountryName.trim(),
-      code: code,
-      flag: flag
-    });
+    const codePoints = code.split('').map(char => 0x1F1E6 + char.charCodeAt(0) - 65);
+    const flag = code.length === 2 ? String.fromCodePoint(...codePoints) : '🌍';
+    const { error } = await supabase.from('countries').insert({ name: newCountryName.trim(), code: code, flag: flag });
     if (!error) {
       setNewCountryName('');
       setNewCountryCode('');
@@ -253,23 +250,34 @@ export default function Admin() {
     setIsAddingCountry(false);
   }
 
-  if (loading || profile?.role !== 'admin')
-    return (
-      <div className="p-8 flex justify-center">
-        <Loader2 className="animate-spin text-brand-primary" size={32} />
-      </div>
-    );
+  if (loading || profile?.role !== 'admin') return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-brand-primary" size={32} /></div>;
 
   return (
     <div className="animate-enter space-y-5">
       <div>
         <h1 className="page-title">Admin</h1>
-        <p className="text-[14px] text-text-secondaryLight dark:text-text-secondaryDark ml-1 mb-2">
-          Manage team access.
-        </p>
+        <p className="text-[14px] text-text-secondaryLight dark:text-text-secondaryDark ml-1 mb-2">Manage team access.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        
+        {/* Award Points */}
+        <div className="card md:col-span-2 space-y-3">
+          <h3 className="text-[16px] font-bold flex items-center gap-2">
+            <Trophy size={18} className="text-brand-primary" /> Award Points
+          </h3>
+          <form onSubmit={handleAwardPoints} className="flex flex-col sm:flex-row gap-2">
+            <select value={selectedMember} onChange={e => setSelectedMember(e.target.value)} className="input-field flex-1" required>
+              <option value="">Select a member...</option>
+              {members.map(m => <option key={m.id} value={m.id}>{m.username} ({m.points} pts)</option>)}
+            </select>
+            <input type="number" placeholder="Points (e.g. 50)" value={pointsToAdd} onChange={e => setPointsToAdd(Number(e.target.value))} className="input-field w-full sm:w-32" required />
+            <button type="submit" disabled={isAwarding} className="h-[44px] px-4 bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 shrink-0">
+              {isAwarding ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />} Add
+            </button>
+          </form>
+        </div>
+
         <div className="card md:col-span-2 space-y-3">
           <h3 className="text-[16px] font-bold flex items-center gap-2">
             <Shield size={18} className="text-brand-primary" /> Generate New ID
@@ -277,41 +285,16 @@ export default function Admin() {
           <form onSubmit={generateId} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[12px] font-semibold mb-1.5 ml-1 text-text-secondaryLight dark:text-text-secondaryDark">
-                  ID Type
-                </label>
-                <SegmentedControl<IdType>
-                  group="idType"
-                  value={idType}
-                  onChange={setIdType}
-                  options={[
-                    { label: 'Sales', value: 'SALES' },
-                    { label: 'Development', value: 'DEV' },
-                  ]}
-                />
+                <label className="block text-[12px] font-semibold mb-1.5 ml-1 text-text-secondaryLight dark:text-text-secondaryDark">ID Type</label>
+                <SegmentedControl<IdType> group="idType" value={idType} onChange={setIdType} options={[{ label: 'Sales', value: 'SALES' }, { label: 'Development', value: 'DEV' }]} />
               </div>
               <div>
-                <label className="block text-[12px] font-semibold mb-1.5 ml-1 text-text-secondaryLight dark:text-text-secondaryDark">
-                  Role
-                </label>
-                <SegmentedControl<RoleType>
-                  group="role"
-                  value={role}
-                  onChange={setRole}
-                  options={[
-                    { label: 'Member', value: 'member' },
-                    { label: 'Admin', value: 'admin' },
-                  ]}
-                />
+                <label className="block text-[12px] font-semibold mb-1.5 ml-1 text-text-secondaryLight dark:text-text-secondaryDark">Role</label>
+                <SegmentedControl<RoleType> group="role" value={role} onChange={setRole} options={[{ label: 'Member', value: 'member' }, { label: 'Admin', value: 'admin' }]} />
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={isGenerating}
-              className="w-full h-[44px] bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 disabled:pointer-events-none"
-            >
-              {isGenerating ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />}
-              Generate {idType}-XXXX
+            <button type="submit" disabled={isGenerating} className="w-full h-[44px] bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 disabled:pointer-events-none">
+              {isGenerating ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />} Generate {idType}-XXXX
             </button>
           </form>
         </div>
@@ -328,21 +311,12 @@ export default function Admin() {
         <div className="card md:col-span-2 space-y-2">
           <h3 className="text-[16px] font-bold mb-2">Team Access</h3>
           {allowedIds.map((id) => (
-            <div
-              key={id.id}
-              className="flex justify-between items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-surface-borderLight dark:border-surface-borderDark"
-            >
+            <div key={id.id} className="flex justify-between items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-surface-borderLight dark:border-surface-borderDark">
               <div>
                 <p className="font-mono font-bold text-[15px]">{id.user_id_code}</p>
-                <p className="text-[11px] text-text-secondaryLight dark:text-text-secondaryDark uppercase tracking-wider font-semibold mt-0.5">
-                  {id.role}
-                </p>
+                <p className="text-[11px] text-text-secondaryLight dark:text-text-secondaryDark uppercase tracking-wider font-semibold mt-0.5">{id.role}</p>
               </div>
-              <div
-                className={`flex items-center gap-1.5 text-[13px] font-semibold ${
-                  id.is_used ? 'text-green-500' : 'text-text-secondaryLight dark:text-text-secondaryDark'
-                }`}
-              >
+              <div className={`flex items-center gap-1.5 text-[13px] font-semibold ${id.is_used ? 'text-green-500' : 'text-text-secondaryLight dark:text-text-secondaryDark'}`}>
                 <UserCheck size={16} /> {id.is_used ? 'Claimed' : 'Ready'}
               </div>
             </div>
@@ -355,13 +329,8 @@ export default function Admin() {
           <h3 className="text-[16px] font-bold flex items-center gap-2">
             <Users size={18} className="text-brand-primary" /> Manage Teams
           </h3>
-          <button
-            type="button"
-            onClick={() => setShowCountrySheet(true)}
-            className="h-9 px-3 bg-brand-primary/10 text-brand-primary rounded-lg text-[12px] font-bold flex items-center gap-1.5 active:scale-95 transition-transform shrink-0"
-          >
-            <Globe size={14} strokeWidth={2.5} />
-            Add Country
+          <button type="button" onClick={() => setShowCountrySheet(true)} className="h-9 px-3 bg-brand-primary/10 text-brand-primary rounded-lg text-[12px] font-bold flex items-center gap-1.5 active:scale-95 transition-transform shrink-0">
+            <Globe size={14} strokeWidth={2.5} /> Add Country
           </button>
         </div>
 
@@ -377,9 +346,7 @@ export default function Admin() {
           </button>
         </form>
         <div className="space-y-2 mt-4">
-          {teams.length === 0 && (
-            <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark text-center py-2">No teams yet.</p>
-          )}
+          {teams.length === 0 && <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark text-center py-2">No teams yet.</p>}
           {teams.map(t => (
             <div key={t.id} className="flex justify-between items-center p-3 rounded-xl bg-surface-light dark:bg-surface-dark border border-surface-borderLight dark:border-surface-borderDark">
               <div>
@@ -394,30 +361,10 @@ export default function Admin() {
 
       <BottomSheet isOpen={showCountrySheet} onClose={() => setShowCountrySheet(false)} title="Add Country">
         <form onSubmit={handleAddCountry} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Country Name"
-            value={newCountryName}
-            onChange={e => setNewCountryName(e.target.value)}
-            className="input-field"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Country Code (e.g. US)"
-            value={newCountryCode}
-            onChange={e => setNewCountryCode(e.target.value)}
-            className="input-field"
-            maxLength={3}
-            required
-          />
-          <button
-            type="submit"
-            disabled={isAddingCountry}
-            className="w-full h-[44px] bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 disabled:pointer-events-none"
-          >
-            {isAddingCountry ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />}
-            Save Country
+          <input type="text" placeholder="Country Name" value={newCountryName} onChange={e => setNewCountryName(e.target.value)} className="input-field" required />
+          <input type="text" placeholder="Country Code (e.g. US)" value={newCountryCode} onChange={e => setNewCountryCode(e.target.value)} className="input-field" maxLength={3} required />
+          <button type="submit" disabled={isAddingCountry} className="w-full h-[44px] bg-brand-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-70 disabled:pointer-events-none">
+            {isAddingCountry ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} strokeWidth={2.5} />} Save Country
           </button>
         </form>
       </BottomSheet>
