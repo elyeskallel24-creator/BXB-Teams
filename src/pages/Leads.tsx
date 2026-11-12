@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { FileText, Loader2, Plus, Search, Building2, Target, ChevronRight, Clock, Phone, Mail, Globe, MapPin, Calendar, CheckSquare, Wrench, Briefcase } from 'lucide-react';
@@ -71,6 +71,7 @@ export default function Leads() {
   const [bizIndustry, setBizIndustry] = useState('');
   const [bizCity, setBizCity] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [nameError, setNameError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<Filter>(() => {
     if (typeof window === 'undefined') return 'all';
@@ -307,107 +308,235 @@ export default function Leads() {
         )}
       </div>
 
-    <Modal
-      isOpen={showNewLead}
-      onClose={() => { setShowNewLead(false); setNameError(false); }}
-      title="New Lead"
-      subtitle="Add a new prospect to your pipeline."
-      footer={
-        <div className="flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => { setShowNewLead(false); setNameError(false); }}
-            className="px-4 h-[44px] rounded-[10px] text-[14px] font-medium text-gray-300 hover:bg-white/5 border border-transparent transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="new-lead-form"
-            disabled={saving}
-            className="px-6 h-[44px] rounded-[10px] bg-[#FF6B2C] hover:bg-[#ff7b42] text-white text-[14px] font-semibold transition-all hover:-translate-y-[1px] disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
-          >
-            {saving ? <><Loader2 className="animate-spin" size={16} /> Saving...</> : "Save Lead"}
-          </button>
-        </div>
-      }
-    >
-      <form
-        id="new-lead-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!bizName.trim()) {
-            setNameError(true);
-            return;
-          }
-          handleCreateLead();
-        }}
-        className="space-y-5"
-      >
-        <div>
-          <label className="block text-[12px] uppercase tracking-wider text-gray-400 mb-2 font-medium">
-            Business Name <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 peer-focus:text-[#FF6B2C] transition-colors" size={16} />
-            <input
-              type="text"
-              placeholder="e.g. Acme Corp"
-              value={bizName}
-              onChange={e => { setBizName(e.target.value); setNameError(false); }}
-              className={['input-field !pl-10 peer', nameError ? '!border-state-danger ring-[3px] ring-state-danger/20' : ''].join(' ')}
-            />
-          </div>
-          {nameError && <p className="text-[12px] text-red-500 mt-1">Business name is required.</p>}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-[12px] uppercase tracking-wider text-gray-400 mb-2 font-medium">
-              Industry
-            </label>
-            <div className="relative">
-              <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 peer-focus:text-[#FF6B2C] transition-colors" size={16} />
-              <input
-                type="text"
-                placeholder="e.g. Restaurant, Retail"
-                value={bizIndustry}
-                onChange={e => setBizIndustry(e.target.value)}
-                className="peer w-full h-[44px] bg-[#1d1d22] border border-white/10 rounded-[10px] pl-10 pr-3 text-white placeholder-gray-500 text-[14px] focus:outline-none focus:border-[#FF6B2C] focus:ring-[3px] focus:ring-[#FF6B2C]/20 transition-all"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-[12px] uppercase tracking-wider text-gray-400 mb-2 font-medium">
-              City
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 peer-focus:text-[#FF6B2C] transition-colors" size={16} />
-              <input
-                type="text"
-                placeholder="e.g. Tunis"
-                value={bizCity}
-                onChange={e => setBizCity(e.target.value)}
-                className="peer w-full h-[44px] bg-[#1d1d22] border border-white/10 rounded-[10px] pl-10 pr-3 text-white placeholder-gray-500 text-[14px] focus:outline-none focus:border-[#FF6B2C] focus:ring-[3px] focus:ring-[#FF6B2C]/20 transition-all"
-              />
-            </div>
-          </div>
-        </div>
-      </form>
-    </Modal>
-
       <BottomSheet isOpen={!!selectedLead} onClose={() => setSelectedLead(null)} title={selectedLead?.businesses?.name || 'Lead Details'}>
         {selectedLead && (
-          <div className="space-y-6">
-            <div className="flex gap-2">
-              <button onClick={() => setShowLogActivity(true)} className="btn-secondary flex-1 !h-10"><FileText size={14} className="text-brand-primary" /> Log Call</button>
+          <div>
+            <div className="flex gap-1.5 overflow-x-auto -mx-5 px-5 pb-3 mb-4 border-b border-surface-borderLight dark:border-surface-borderDark">
+              {([
+                { key: 'overview', label: 'Overview' },
+                { key: 'activity', label: 'Activity' },
+                { key: 'qualification', label: 'Qualification' },
+                { key: 'history', label: 'History' },
+              ] as { key: Tab; label: string }[]).map(t => (
+                <button key={t.key} onClick={() => setActiveTab(t.key)} className={activeTab === t.key ? 'chip-active' : 'chip'}>
+                  {t.label}
+                </button>
+              ))}
             </div>
-            <ActivityTimeline leadId={selectedLead.id} />
-            <LeadQualification lead={selectedLead} />
-            <LeadAssignment lead={selectedLead} />
+
+            {activeTab === 'overview' && (
+              <div className="space-y-5">
+                <div className="flex flex-wrap gap-2">
+                  <span className={stageBadgeClass(selectedLead.stage)}>{selectedLead.stage}</span>
+                  {selectedLead.priority && selectedLead.priority !== 'Medium' && (
+                    <span className="badge-neutral">{selectedLead.priority} priority</span>
+                  )}
+                  {selectedLead.next_follow_up && (
+                    <span className="badge-neutral">Follow-up {new Date(selectedLead.next_follow_up).toLocaleDateString()}</span>
+                  )}
+                </div>
+
+                {(phone || email || website) && (
+                  <div>
+                    <p className="eyebrow mb-2">Contact</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {phone && (
+                        <a href={'tel:' + phone} className="btn-secondary !h-[48px] flex-col !gap-1 text-[11px] !font-semibold">
+                          <Phone size={16} />Call
+                        </a>
+                      )}
+                      {email && (
+                        <a href={'mailto:' + email} className="btn-secondary !h-[48px] flex-col !gap-1 text-[11px] !font-semibold">
+                          <Mail size={16} />Email
+                        </a>
+                      )}
+                      {website && (
+                        <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="btn-secondary !h-[48px] flex-col !gap-1 text-[11px] !font-semibold">
+                          <Globe size={16} />Website
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {(selectedLead.businesses?.city || selectedLead.businesses?.country || selectedLead.businesses?.industry) && (
+                  <div>
+                    <p className="eyebrow mb-2">Business</p>
+                    <div className="card !p-3 space-y-1.5 text-[13px]">
+                      {selectedLead.businesses?.industry && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-text-secondaryLight dark:text-text-secondaryDark">Industry</span>
+                          <span className="font-medium truncate ml-2">{selectedLead.businesses?.industry}</span>
+                        </div>
+                      )}
+                      {(selectedLead.businesses?.city || selectedLead.businesses?.country) && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-text-secondaryLight dark:text-text-secondaryDark flex items-center gap-1">
+                            <MapPin size={12} /> Location
+                          </span>
+                          <span className="font-medium truncate ml-2">
+                            {[selectedLead.businesses?.city, selectedLead.businesses?.country].filter(Boolean).join(', ')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <p className="eyebrow mb-2">Current stage</p>
+                  <select value={selectedLead.stage} onChange={e => handleUpdateStage(e.target.value)} disabled={isUpdatingStage} className="input-field w-full">
+                    {STAGES.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <p className="eyebrow mb-2">Quick actions</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => navigate('/meetings', { state: { openCreate: true, leadId: selectedLead.id } })} className="btn-secondary !h-[44px] !text-[12px] !font-semibold flex items-center justify-center gap-2">
+                      <Calendar size={14} className="text-brand-primary" /> Schedule
+                    </button>
+                    <button onClick={() => navigate('/tasks', { state: { openCreate: true, leadId: selectedLead.id } })} className="btn-secondary !h-[44px] !text-[12px] !font-semibold flex items-center justify-center gap-2">
+                      <CheckSquare size={14} className="text-brand-primary" /> Follow-up
+                    </button>
+                    <button onClick={() => navigate('/technical-handovers', { state: { openCreate: true, leadId: selectedLead.id } })} className="btn-secondary !h-[44px] !text-[12px] !font-semibold flex items-center justify-center gap-2">
+                      <Wrench size={14} className="text-brand-primary" /> Tech Request
+                    </button>
+                    <button onClick={() => setActiveTab('activity')} className="btn-secondary !h-[44px] !text-[12px] !font-semibold flex items-center justify-center gap-2">
+                      <FileText size={14} className="text-brand-primary" /> Log Call
+                    </button>
+                  </div>
+                </div>
+
+                <LeadAssignment leadId={selectedLead.id} currentAssignee={selectedLead.assigned_to} teamId={selectedLead.team_id} onChanged={fetchLeads} />
+              </div>
+            )}
+
+            {activeTab === 'activity' && (
+              <ActivityTimeline leadId={selectedLead.id} businessId={selectedLead.business_id} />
+            )}
+
+            {activeTab === 'qualification' && (
+              <LeadQualification leadId={selectedLead.id} />
+            )}
+
+            {activeTab === 'history' && (
+              <div>
+                {loadingHistory ? (
+                  <div className="space-y-3">
+                    {[0, 1, 2].map(i => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="w-2 h-2 rounded-full bg-black/10 dark:bg-white/10 mt-2" />
+                        <div className="flex-1 space-y-1.5">
+                          <SkeletonBox className="h-3 w-1/3" />
+                          <SkeletonBox className="h-3 w-1/2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : history.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center mx-auto mb-3">
+                      <Clock size={22} className="text-text-mutedLight dark:text-text-mutedDark" />
+                    </div>
+                    <p className="text-[14px] font-semibold mb-1">No stage changes yet</p>
+                    <p className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark">Updates to this lead's stage will appear here.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 relative border-l border-surface-borderLight dark:border-surface-borderDark ml-2 pl-4">
+                    {history.map(h => (
+                      <div key={h.id} className="relative">
+                        <div className="absolute -left-[22px] top-1.5 w-2.5 h-2.5 bg-brand-primary rounded-full ring-2 ring-surface-cardLight dark:ring-surface-elevatedDark" />
+                        <p className="text-[13px] font-semibold tracking-tight">{h.new_stage}</p>
+                        <p className="text-[11px] text-text-secondaryLight dark:text-text-secondaryDark">
+                          from {h.old_stage || '\u2014'} {'\u00B7'} {new Date(h.created_at).toLocaleString()}
+                        </p>
+                        <p className="text-[11px] text-text-mutedLight dark:text-text-mutedDark">by {h.profiles?.username || 'System'}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </BottomSheet>
+
+      <Modal
+        isOpen={showSheet}
+        onClose={() => { setShowSheet(false); setNameError(false); }}
+        title="New Lead"
+        subtitle="Add a new prospect to your pipeline."
+        footer={
+          <div className="flex items-center justify-end gap-3">
+            <button type="button" onClick={() => { setShowSheet(false); setNameError(false); }} className="btn-secondary !h-[44px] px-4">
+              Cancel
+            </button>
+            <button type="submit" form="new-lead-form" disabled={isCreating} className="btn-primary !h-[44px] px-6">
+              {isCreating ? <Loader2 className="animate-spin" size={18} /> : 'Save Lead'}
+            </button>
+          </div>
+        }
+      >
+        <form
+          id="new-lead-form"
+          onSubmit={(e) => {
+            if (!bizName.trim()) {
+              e.preventDefault();
+              setNameError(true);
+              return;
+            }
+            handleCreateLead(e);
+          }}
+          className="space-y-5"
+        >
+          <div>
+            <label className="eyebrow block mb-1.5">Business name <span className="text-red-500">*</span></label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="e.g. Acme Corp"
+                value={bizName}
+                onChange={e => { setBizName(e.target.value); if (nameError) setNameError(false); }}
+                className={['input-field peer !pl-10', nameError ? '!border-red-500' : ''].join(' ')}
+              />
+              <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-mutedLight dark:text-text-mutedDark peer-focus:text-brand-primary transition-colors pointer-events-none" />
+            </div>
+            {nameError && <p className="text-[12px] text-red-500 mt-1.5">Business name is required.</p>}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="eyebrow block mb-1.5">Industry</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="e.g. Restaurant, Retail"
+                  value={bizIndustry}
+                  onChange={e => setBizIndustry(e.target.value)}
+                  className="input-field peer !pl-10"
+                />
+                <Briefcase size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-mutedLight dark:text-text-mutedDark peer-focus:text-brand-primary transition-colors pointer-events-none" />
+              </div>
+            </div>
+            <div>
+              <label className="eyebrow block mb-1.5">City</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="e.g. Tunis"
+                  value={bizCity}
+                  onChange={e => setBizCity(e.target.value)}
+                  className="input-field peer !pl-10"
+                />
+                <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-mutedLight dark:text-text-mutedDark peer-focus:text-brand-primary transition-colors pointer-events-none" />
+              </div>
+            </div>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

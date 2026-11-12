@@ -22,7 +22,7 @@ export function Modal({ isOpen, onClose, title, subtitle, children, footer }: Mo
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
       if (focusableElements && focusableElements.length > 0) {
-        (focusableElements[0] as HTMLElement).focus();
+        ((modalRef.current?.querySelector('input, textarea, select') as HTMLElement | null) ?? (focusableElements[0] as HTMLElement)).focus();
       }
     } else {
       document.body.style.overflow = '';
