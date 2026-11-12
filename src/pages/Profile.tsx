@@ -1,98 +1,201 @@
-﻿import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+﻿import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { LogOut, Camera, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Loader2, Camera, LogOut, Save, Hash, User, Shield } from 'lucide-react';
+import { SkeletonBox } from '../components/Skeleton';
+import { useToast } from '../components/Toast';
 
 export default function Profile() {
   const { profile } = useAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [username, setUsername] = useState(profile?.username || '');
-  const [isEditing, setIsEditing] = useState(false);
 
-  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    
-    try {
-      const img = await createImageBitmap(file);
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 256;
-      const ctx = canvas.getContext('2d');
-      const size = Math.min(img.width, img.height);
-      ctx?.drawImage(img, (img.width-size)/2, (img.height-size)/2, size, size, 0, 0, 256, 256);
-      
-      const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/webp', 0.8));
-      if (!blob) throw new Error("Failed to process image");
+  const [username, setUsername] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [teamName, setTeamName] = useState('');
+  const [countryName, setCountryName] = useState('');
+  const [points, setPoints] = useState(0);
 
-      const filePath = profile!.id + '/avatar.webp';
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, blob, { upsert: true });
-      if (uploadError) throw uploadError;
+  useEffect(() => {
+    if (!profile) return;
+    setUsername(profile.username || '');
+    setAvatarUrl(profile.avatar_url || null);
+    fetchTeam();
+  }, [profile]);
 
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      await supabase.from('profiles').update({ avatar_url: data.publicUrl }).eq('id', profile!.id);
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-      alert('Error uploading photo');
-    } finally {
-      setUploading(false);
+  async function fetchTeam() {
+    if (!profile) return;
+    setLoading(true);
+    const { data: team } = await supabase
+      .from('teams')
+      .select('name, country_id, countries(name)')
+      .eq('id', profile.team_id)
+      .maybeSingle();
+    if (team) {
+      setTeamName((team as any).name || '');
+      setCountryName((team as any).countries?.name || '');
+    }
+    setPoints((profile as any).points || 0);
+    setLoading(false);
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!profile) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ username: username.trim() })
+      .eq('id', profile.id);
+    if (error) {
+      toast.error('Could not save profile');
+      setSaving(false);
+    } else {
+      toast.success('Profile updated');
+      // Reload so the sidebar/header re-hydrates from Supabase
+      setTimeout(() => window.location.reload(), 400);
     }
   }
 
-  async function handleUsernameUpdate() {
-    if (username.length < 3 || username.length > 20) {
-      return alert('Username must be between 3 and 20 characters.');
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+      toast.error('Only images allowed');
+      return;
     }
-    const { error } = await supabase.from('profiles').update({ username }).eq('id', profile!.id);
-    if (error) alert('Error updating username');
-    else window.location.reload();
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Avatar must be under 5 MB');
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split('.').pop() || 'png';
+    const path = profile.id + '/avatar-' + Date.now() + '.' + ext;
+    const up = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+    if (up.error) {
+      toast.error('Upload failed');
+      setUploading(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+    const { error } = await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', profile.id);
+    if (error) {
+      toast.error('Could not save avatar');
+      setUploading(false);
+    } else {
+      toast.success('Avatar updated');
+      setAvatarUrl(urlData.publicUrl);
+      setTimeout(() => window.location.reload(), 400);
+    }
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    navigate('/login');
+  }
+
+  if (!profile) return null;
+
+  if (loading) {
+    return (
+      <div className="p-6 md:p-8 max-w-2xl mx-auto">
+        <SkeletonBox className="h-8 w-32 mb-5" />
+        <div className="card p-4 mb-4 flex items-center gap-3">
+          <SkeletonBox className="w-16 h-16 rounded-full" />
+          <div className="flex-1 space-y-1.5">
+            <SkeletonBox className="h-5 w-40" />
+            <SkeletonBox className="h-3 w-32" />
+          </div>
+        </div>
+        <SkeletonBox className="h-40 rounded-2xl mb-4" />
+        <SkeletonBox className="h-12 rounded-2xl" />
+      </div>
+    );
   }
 
   return (
-    <div className="animate-enter space-y-6">
-      <h1 className="page-title">Profile</h1>
-      
-      <div className="card flex flex-col items-center text-center space-y-4 py-8 relative">
-        <div className="relative group cursor-pointer">
-          <img src={profile?.avatar_url} alt="You" className="w-20 h-20 rounded-full object-cover bg-gray-200 shadow-sm" />
-          <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            {uploading ? <Loader2 className="animate-spin text-white" size={20} /> : <Camera className="text-white" size={20} />}
-          </div>
-          <input type="file" accept="image/*" onChange={handlePhotoUpload} className="absolute inset-0 opacity-0 cursor-pointer" disabled={uploading} />
-          <div className="absolute -bottom-1 -right-1 bg-brand-primary text-black p-1.5 rounded-full shadow-md pointer-events-none">
-            <Camera size={12} />
-          </div>
-        </div>
-
-        <div className="w-full max-w-[240px] mt-2">
-          {isEditing ? (
-            <div className="space-y-2">
-              <input type="text" value={username} onChange={e => setUsername(e.target.value)} className="input-field text-center" placeholder="New username" />
-              <div className="flex gap-2">
-                <button onClick={() => setIsEditing(false)} className="btn-secondary flex-1 py-1.5 text-[13px] h-9">Cancel</button>
-                <button onClick={handleUsernameUpdate} className="btn-primary flex-1 py-1.5 text-[13px] h-9">Save</button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center gap-2">
-              <h2 className="text-[20px] font-bold">{profile?.username}</h2>
-              <button onClick={() => setIsEditing(true)} className="text-text-secondaryLight dark:text-text-secondaryDark hover:text-brand-primary transition">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-              </button>
-            </div>
-          )}
-          <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark mt-1">ID: {profile?.user_id_code}</p>
-          <span className="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded bg-brand-primary/10 text-brand-primary uppercase tracking-wider">
-            {profile?.role}
-          </span>
-        </div>
-
-        <button onClick={() => supabase.auth.signOut()} className="btn-secondary mt-4 text-red-500 hover:text-red-600 border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-950/30 h-10 text-[14px]">
-          <LogOut size={16} /> Log Out
-        </button>
+    <div className="p-6 md:p-8 max-w-2xl mx-auto animate-enter">
+      <div className="mb-5 md:mb-6">
+        <h1 className="page-title">Profile</h1>
+        <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark">
+          Your account details and avatar
+        </p>
       </div>
+
+      <div className="card !p-4 mb-4 flex items-center gap-4">
+        <div className="relative shrink-0">
+          <img
+            src={avatarUrl || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + profile.username}
+            alt=""
+            className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5"
+          />
+          <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-brand-primary text-black flex items-center justify-center cursor-pointer shadow-lg active:scale-95 transition-transform">
+            {uploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleAvatarUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+          </label>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-[18px] font-bold tracking-tight truncate">{profile.username}</h2>
+          <p className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark font-mono tabular-nums">{profile.user_id_code}</p>
+          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            <span className={profile.role === 'admin' ? 'badge-brand' : 'badge-neutral'}>{profile.role}</span>
+            {teamName && <span className="badge-neutral">{teamName}</span>}
+            {countryName && <span className="badge-neutral">{countryName}</span>}
+            {points > 0 && <span className="badge-success">{points} pts</span>}
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={handleSave} className="card !p-4 mb-4 space-y-4">
+        <div>
+          <label className="eyebrow block mb-1.5">Username</label>
+          <div className="relative">
+            <User size={16} className="absolute left-3 top-3.5 text-text-mutedLight dark:text-text-mutedDark" />
+            <input
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              className="input-field pl-10"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="eyebrow block mb-1.5">User ID</label>
+          <div className="relative">
+            <Hash size={16} className="absolute left-3 top-3.5 text-text-mutedLight dark:text-text-mutedDark" />
+            <input type="text" value={profile.user_id_code} className="input-field pl-10 font-mono bg-black/5 dark:bg-white/5" readOnly />
+          </div>
+          <p className="text-[11px] text-text-mutedLight dark:text-text-mutedDark mt-1">Contact your admin to change this.</p>
+        </div>
+
+        <div>
+          <label className="eyebrow block mb-1.5">Role</label>
+          <div className="relative">
+            <Shield size={16} className="absolute left-3 top-3.5 text-text-mutedLight dark:text-text-mutedDark" />
+            <input type="text" value={profile.role} className="input-field pl-10 capitalize bg-black/5 dark:bg-white/5" readOnly />
+          </div>
+        </div>
+
+        <button type="submit" disabled={saving} className="btn-primary w-full">
+          {saving ? <><Loader2 className="animate-spin" size={16} /> Saving…</> : <><Save size={16} /> Save Changes</>}
+        </button>
+      </form>
+
+      <button onClick={handleSignOut} className="w-full h-[44px] rounded-xl bg-state-dangerSoft text-state-danger text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
+        <LogOut size={16} /> Sign out
+      </button>
     </div>
   );
 }
