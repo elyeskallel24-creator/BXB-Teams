@@ -119,13 +119,16 @@ export default function Pipeline() {
   async function handleUpdateStage(newStage: string) {
     if (!selectedLead) return;
     setIsUpdating(true);
-    const { error } = await supabase.from('leads').update({ stage: newStage }).eq('id', selectedLead.id);
-    if (!error) {
+    const { data, error } = await supabase.from('leads').update({ stage: newStage }).eq('id', selectedLead.id).select();
+    if (error) {
+      console.error('Update stage error:', error);
+      toast.error('Error: ' + (error.message || error.details || 'Unknown error'));
+    } else if (!data || data.length === 0) {
+      toast.error('Update failed: Lead not found or permission denied.');
+    } else {
       toast.success('Stage updated');
       setSelectedLead({ ...selectedLead, stage: newStage });
       fetchLeads();
-    } else {
-      toast.error('Could not update stage');
     }
     setIsUpdating(false);
   }
@@ -248,7 +251,7 @@ export default function Pipeline() {
         <input
           type="text"
           placeholder="Search leads..."
-          className="input-field pl-10"
+          className="input-field !pl-10"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
         />

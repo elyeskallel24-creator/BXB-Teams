@@ -1,4 +1,5 @@
-﻿import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 
@@ -26,7 +27,7 @@ export function BottomSheet({ isOpen, onClose, title, footer, children }: Props)
       const t = setTimeout(() => setVisible(false), 240);
       return () => clearTimeout(t);
     }
-  }, [isOpen]);
+  }, [isOpen, visible]);
 
   useEffect(() => {
     if (!visible) return;
@@ -89,8 +90,8 @@ export function BottomSheet({ isOpen, onClose, title, footer, children }: Props)
 
   const slideOffset = isOpen ? translateY : 1000;
 
-  return (
-    <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}>
+  return createPortal(
+    <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center md:p-6" role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}>
       <div
         className="absolute inset-0 bg-black/40 dark:bg-black/65 backdrop-blur-sm transition-all duration-300"
         style={{
@@ -101,7 +102,7 @@ export function BottomSheet({ isOpen, onClose, title, footer, children }: Props)
         onClick={handleBackdropClick}
       />
       <div
-        className="absolute left-0 right-0 mx-auto max-w-xl md:max-w-2xl bg-surface-elevatedLight dark:bg-surface-elevatedDark rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.2)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-x border-surface-borderLight dark:border-surface-borderDark flex flex-col max-h-[88dvh]"
+        className="relative w-full md:max-w-[560px] bg-surface-elevatedLight dark:bg-surface-elevatedDark rounded-t-[2rem] md:rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] md:shadow-[0_10px_40px_rgba(0,0,0,0.5)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] dark:md:shadow-[0_10px_40px_rgba(0,0,0,0.6)] border-t border-x md:border border-surface-borderLight dark:border-surface-borderDark flex flex-col max-h-[88dvh] overflow-hidden"
         style={{
           transform: `translateY(${slideOffset}px)`,
           transitionProperty: 'transform',
@@ -119,7 +120,7 @@ export function BottomSheet({ isOpen, onClose, title, footer, children }: Props)
         >
           <div className="w-9" />
           <div className="flex flex-col items-center flex-1 min-w-0">
-            <div className="w-10 h-1 bg-black/15 dark:bg-white/20 rounded-full mb-2" />
+            <div className="w-10 h-1 bg-black/15 dark:bg-white/20 rounded-full mb-2 md:hidden" />
             {title && (
               <h2 id={titleId} className="text-[17px] font-bold truncate max-w-full px-2 tracking-tight">
                 {title}
@@ -144,14 +145,14 @@ export function BottomSheet({ isOpen, onClose, title, footer, children }: Props)
 
         {footer && (
           <div
-            className="shrink-0 border-t border-surface-borderLight dark:border-surface-borderDark px-4 py-3 bg-surface-elevatedLight dark:bg-surface-elevatedDark"
+            className="shrink-0 border-t border-surface-borderLight dark:border-surface-borderDark px-4 py-3 bg-surface-elevatedLight dark:bg-surface-elevatedDark md:rounded-b-2xl"
             style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
           >
             {footer}
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
-

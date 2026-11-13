@@ -2,13 +2,16 @@
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, Camera, LogOut, Save, Hash, User, Shield } from 'lucide-react';
+import { Loader2, Camera, LogOut, Save, Hash, User, Shield, Laptop, Smartphone } from 'lucide-react';
 import { SkeletonBox } from '../components/Skeleton';
+import { PWAInstallButton } from '../components/PWAInstallButton';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 import { useToast } from '../components/Toast';
 
 export default function Profile() {
   const { profile } = useAuth();
   const toast = useToast();
+  const { isInstalled, promptInstall } = usePWAInstall();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -192,6 +195,22 @@ export default function Profile() {
           {saving ? <><Loader2 className="animate-spin" size={16} /> Saving…</> : <><Save size={16} /> Save Changes</>}
         </button>
       </form>
+
+      {!isInstalled && (
+        <div className="card !p-6 mb-4 flex flex-col items-center text-center bg-gradient-to-b from-[var(--bg-surface)] to-[var(--bg-base)] border border-[var(--border)]">
+          <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF6B2C]/20 to-[#FF6B2C]/5 ring-1 ring-[#FF6B2C]/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] flex items-center justify-center mb-4 text-[#FF6B2C]">
+              <div className="flex items-center gap-2">
+                <Laptop size={20} strokeWidth={2} />
+                <Smartphone size={20} strokeWidth={2} />
+              </div>
+            </div>
+          <h3 className="text-[16px] font-bold tracking-tight mb-1">Get the BXB Teams App</h3>
+          <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark mb-4 max-w-[250px]">
+            Install BXB Teams on your phone or laptop for quick access and a native, full-screen experience.
+          </p>
+          <PWAInstallButton onClick={promptInstall} />
+        </div>
+      )}
 
       <button onClick={handleSignOut} className="w-full h-[44px] rounded-xl bg-state-dangerSoft text-state-danger text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
         <LogOut size={16} /> Sign out

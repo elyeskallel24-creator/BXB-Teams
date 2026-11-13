@@ -236,11 +236,11 @@ export default function Leads() {
       </div>
 
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-3.5 text-text-mutedLight dark:text-text-mutedDark" size={18} />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-mutedLight dark:text-text-mutedDark" size={18} />
         <input
           type="text"
           placeholder="Search by name, industry or city..."
-          className="input-field pl-10"
+          className="input-field !pl-11"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
         />
@@ -311,7 +311,7 @@ export default function Leads() {
       <BottomSheet isOpen={!!selectedLead} onClose={() => setSelectedLead(null)} title={selectedLead?.businesses?.name || 'Lead Details'}>
         {selectedLead && (
           <div>
-            <div className="flex gap-1.5 overflow-x-auto -mx-5 px-5 pb-3 mb-4 border-b border-surface-borderLight dark:border-surface-borderDark">
+            <div className="sticky -top-4 z-10 bg-surface-elevatedLight dark:bg-surface-elevatedDark flex flex-wrap gap-1.5 -mx-5 px-5 pt-4 pb-3 mb-4 border-b border-surface-borderLight dark:border-surface-borderDark">
               {([
                 { key: 'overview', label: 'Overview' },
                 { key: 'activity', label: 'Activity' },
@@ -513,7 +513,7 @@ export default function Leads() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="e.g. Restaurant, Retail"
+                  placeholder="e.g. Tech, Healthcare, Sports, Agency"
                   value={bizIndustry}
                   onChange={e => setBizIndustry(e.target.value)}
                   className="input-field peer !pl-10"

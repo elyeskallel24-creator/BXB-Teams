@@ -1,18 +1,21 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { Loader2, Sun, Moon, ArrowRight } from 'lucide-react';
 import { useToast } from '../components/Toast';
+import { usePWAInstall } from '../hooks/usePWAInstall';
+import { PWAInstallButton } from '../components/PWAInstallButton';
 
 export default function Login() {
   const toast = useToast();
+  const { isInstalled, promptInstall } = usePWAInstall();
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<'login' | 'claim'>('login');
-  
+
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [avatar, setAvatar] = useState<File | null>(null);
-  
+
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem('bxb-theme') as 'light' | 'dark') || 'dark';
@@ -61,7 +64,7 @@ export default function Login() {
     setLoading(true);
 
     const email = `${userId.toLowerCase()}@bxb-team.com`;
-    
+
     const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
     if (authError || !authData.user) {
       toast.error(authError?.message || 'Could not create account');
@@ -96,17 +99,17 @@ export default function Login() {
 
   return (
     <div className="min-h-dvh flex flex-col bg-[var(--bg-base)] relative overflow-hidden">
-      
+
       {/* Subtle background gradient */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        background: theme === 'dark' 
+        background: theme === 'dark'
           ? 'radial-gradient(circle at 50% 0%, rgba(255,107,44,0.08) 0%, transparent 60%)'
           : 'radial-gradient(circle at 50% 0%, rgba(255,107,44,0.05) 0%, transparent 60%)'
       }} />
 
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 z-50">
-        <button 
+        <button
           onClick={toggleTheme}
           className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-[var(--border)] backdrop-blur-md"
           aria-label="Toggle theme"
@@ -116,28 +119,27 @@ export default function Login() {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-md mx-auto animate-enter relative z-10">
-        
+
         {/* Logo & Branding */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative mb-5 group">
             {/* Logo Glow */}
             <div className="absolute inset-0 bg-[var(--brand)] blur-2xl opacity-50 group-hover:opacity-40 transition-opacity duration-500 rounded-full" />
-            
-            {/* Logo Container - Update the src below if your file is named differently (e.g. logo.svg or bxb-logo.png) */}
+
+            {/* Logo Container */}
             <div className="w-20 h-20 flex items-center justify-center relative z-10">
-              <img 
-                src="/logo.webp" 
-                alt="BXB Logo" 
+              <img
+                src="/logo.webp"
+                alt="BXB Logo"
                 className="w-full h-full object-contain drop-shadow-2xl"
                 onError={(e) => {
-                  // Fallback if image isn't found
                   e.currentTarget.style.display = 'none';
                   e.currentTarget.parentElement!.innerHTML = '<span style="color:var(--brand);font-weight:bold;font-size:24px;">BXB</span>';
                 }}
               />
             </div>
           </div>
-          
+
           <h1 className="text-[26px] font-bold tracking-tight text-[var(--text-primary)]">BXB Teams</h1>
           <p className="text-[13px] font-medium text-[var(--text-secondary)] mt-1.5 text-center leading-tight italic opacity-80">
             On my stallion i will ride with the 4 horsemen
@@ -151,15 +153,15 @@ export default function Login() {
               {mode === 'login' ? 'Welcome back' : 'Claim your Team ID'}
             </h2>
             <p className="text-[13px] text-[var(--text-secondary)]">
-              {mode === 'login' 
-                ? 'Sign in to continue to your workspace.' 
+              {mode === 'login'
+                ? 'Sign in to continue to your workspace.'
                 : 'Enter your assigned ID to join the network.'}
             </p>
           </div>
 
           {/* Auto-complete completely disabled on form and inputs */}
           <form onSubmit={mode === 'login' ? handleLogin : handleClaim} className="space-y-4" autoComplete="off">
-            
+
             <div>
               <label className="eyebrow block mb-1.5">User ID</label>
               <input
@@ -235,6 +237,8 @@ export default function Login() {
           </div>
         </div>
 
+        {!isInstalled && <PWAInstallButton onClick={promptInstall} />}
+
         <p className="mt-8 text-[12px] text-[var(--text-muted)] font-medium">
           We will all win at the end
         </p>
@@ -242,5 +246,3 @@ export default function Login() {
     </div>
   );
 }
-
-

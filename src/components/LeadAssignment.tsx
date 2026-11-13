@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, UserCheck, RefreshCw } from 'lucide-react';
@@ -28,12 +28,24 @@ export function LeadAssignment({
   useEffect(() => { setSelected(currentAssignee || ''); }, [currentAssignee]);
 
   async function fetchMembers() {
+    if (!teamId || teamId === 'undefined' || teamId === 'null' || teamId.trim() === '') {
+      setLoading(false);
+      setMembers([]);
+      return;
+    }
+
     setLoading(true);
-    const { data } = await supabase
+    // Removed the .in('role', [...]) filter to prevent ENUM mismatch errors.
+    // We just fetch everyone in the team.
+    const { data, error } = await supabase
       .from('profiles')
       .select('id, username, role')
-      .eq('team_id', teamId)
-      .in('role', ['member', 'sales_rep', 'team_leader', 'admin']);
+      .eq('team_id', teamId);
+      
+    if (error) {
+      console.error("Error fetching team members:", error.message);
+    }
+    
     if (data) setMembers(data as any);
     setLoading(false);
   }
@@ -48,13 +60,14 @@ export function LeadAssignment({
       .update({ assigned_to: selected })
       .eq('id', leadId);
     if (updateErr) { setMsg(updateErr.message); setSaving(false); return; }
-    await supabase.from('lead_assignments').insert({
+    const { error: assignErr } = await supabase.from('lead_assignments').insert({
       lead_id: leadId,
       from_user: previous || null,
       to_user: selected,
       changed_by: profile.id
     });
-    await supabase.from('audit_logs').insert({
+    if (assignErr) console.error('Failed to log assignment history:', assignErr);
+    const { error: auditErr } = await supabase.from('audit_logs').insert({
       actor_id: profile.id,
       action: 'Lead reassigned',
       entity_type: 'lead',
@@ -62,6 +75,7 @@ export function LeadAssignment({
       old_value: { assigned_to: previous },
       new_value: { assigned_to: selected }
     });
+    if (auditErr) console.error('Failed to log audit trail:', auditErr);
     setMsg('Reassigned successfully.');
     if (onChanged) onChanged();
     setSaving(false);
@@ -70,6 +84,15 @@ export function LeadAssignment({
   if (!canManage) return null;
 
   if (loading) return <div className="py-2 flex justify-center"><Loader2 className="animate-spin text-brand-primary" size={16} /></div>;
+
+  if (members.length === 0) return (
+    <div className="space-y-2">
+      <h4 className="text-[14px] font-bold flex items-center gap-2"><UserCheck size={16} /> Assignment</h4>
+      <p className="text-[12px] text-text-secondaryLight dark:text-text-secondaryDark">
+        {!teamId ? "This lead is not assigned to a team yet." : "No other team members available to assign."}
+      </p>
+    </div>
+  );
 
   return (
     <div className="space-y-2">
@@ -97,4 +120,3 @@ export function LeadAssignment({
     </div>
   );
 }
-

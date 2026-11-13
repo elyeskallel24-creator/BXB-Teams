@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { supabase } from '../supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -36,30 +36,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const userId = session?.user.id;
-    if (!userId) return;
+    // Added optional chaining to user and strict checks for "undefined"/"null" strings
+    const userId = session?.user?.id;
+    
+    if (!userId || typeof userId !== 'string' || userId === 'undefined' || userId === 'null' || userId.trim() === '') {
+      if (!session) setLoading(false);
+      return;
+    }
 
     async function fetchProfile() {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
 
-      if (error) console.error("Error fetching profile:", error.message);
-      if (data) {
-        setProfile(prev => {
-          if (prev?.id === data.id && prev?.username === data.username && prev?.role === data.role && prev?.avatar_url === data.avatar_url) {
-            return prev;
-          }
-          return data;
-        });
+        if (error) {
+          console.error("Error fetching profile:", error.message);
+        } else if (data) {
+          setProfile(prev => {
+            if (prev?.id === data.id && prev?.username === data.username && prev?.role === data.role && prev?.avatar_url === data.avatar_url) {
+              return prev;
+            }
+            return data;
+          });
+        }
+      } catch (err) {
+        console.error("Unexpected error fetching profile:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     fetchProfile();
-  }, [session?.user.id]);
+  }, [session?.user?.id]);
 
   const value = useMemo(() => ({ session, profile, loading }), [session, profile, loading]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

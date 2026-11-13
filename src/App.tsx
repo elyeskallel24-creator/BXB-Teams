@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation, Link, use
 import {
   Home, Users, LayoutDashboard, CheckSquare, Menu, Bell,
   Briefcase, Calendar, Wrench, FileText, DollarSign, Settings,
-  BarChart3, BookOpen, GraduationCap, Target, ShieldAlert,
+  BarChart3, BookOpen, GraduationCap, Target, Globe, History,
   TrendingUp, X, ChevronRight, Layers, Loader2, User, LogOut,
   Sun, Moon
 } from 'lucide-react';
@@ -64,7 +64,7 @@ const NAV_GROUPS = [
       { name: 'Handovers', path: '/technical-handovers', icon: Wrench },
       { name: 'Deals', path: '/deals', icon: Briefcase },
       { name: 'Proposals', path: '/proposals', icon: FileText },
-      { name: 'Services', path: '/services', icon: ShieldAlert },
+      { name: 'Services', path: '/services', icon: Briefcase },
       { name: 'Targets', path: '/targets', icon: Target },
     ]
   },
@@ -85,9 +85,9 @@ const NAV_GROUPS = [
     label: 'Team Management',
     items: [
       { name: 'Teams', path: '/teams', icon: Users },
-      { name: 'Command Center', path: '/command-center', icon: ShieldAlert },
+      { name: 'Command Center', path: '/command-center', icon: Globe },
       { name: 'Commercial Records', path: '/commercial-records', icon: DollarSign },
-      { name: 'Audit Logs', path: '/audit-logs', icon: ShieldAlert },
+      { name: 'Audit Logs', path: '/audit-logs', icon: History },
       { name: 'Administration', path: '/admin', icon: Settings },
     ]
   },

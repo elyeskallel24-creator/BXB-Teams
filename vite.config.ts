@@ -8,7 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: { globIgnores: ['**/pdf.worker*'] },
-      includeAssets: ['logo.webp', 'favicon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'BXB Teams',
         short_name: 'BXB Teams',
@@ -17,18 +17,23 @@ export default defineConfig({
         background_color: '#0A0A0A',
         icons: [
           {
-            src: 'logo.webp',
+            src: 'pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/webp'
+            type: 'image/png'
           },
           {
-            src: 'logo.webp',
+            src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/webp'
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
     })
   ],
 })
-
