@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { DEAL_STAGES, OPEN_DEAL_STAGES, stageBadgeClass } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
@@ -23,14 +23,6 @@ type Deal = {
 
 
 const CURRENCIES = ['USD', 'EUR', 'TND', 'GBP'];
-
-function stageBadgeClass(stage: string) {
-  if (stage === 'Won') return 'badge-success';
-  if (stage === 'Lost') return 'badge-danger';
-  if (BRAND_STAGES.includes(stage)) return 'badge-brand';
-  if (stage === 'Opportunity Created') return 'badge-neutral';
-  return 'badge-info';
-}
 
 type Filter = 'all' | 'open' | 'won' | 'lost';
 

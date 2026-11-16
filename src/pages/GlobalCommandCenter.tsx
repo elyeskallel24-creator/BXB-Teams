@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { localToday } from '../lib/date';
 import { LEAD_STAGES, OPEN_DEAL_STAGES } from '../lib/stages';
@@ -23,7 +23,7 @@ export default function GlobalCommandCenter() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [kpis, setKpis] = useState<Kpi[]>([]);
-  const [LEAD_STAGES, setLEAD_STAGES] = useState<{ stage: string; count: number }[]>([]);
+  const [funnel, setFunnel] = useState<{ stage: string; count: number }[]>([]);
   const [teams, setTeams] = useState<{ id: string; name: string; members: number; leads: number; won: number; revenue: number; currency: string }[]>([]);
   const [attention, setAttention] = useState<{ label: string; count: number; go: () => void }[]>([]);
 
@@ -75,7 +75,7 @@ export default function GlobalCommandCenter() {
       { label: 'Revenue', value: domCur ? compact(domCur[1]) + ' ' + domCur[0] : '—', tone: 'success', icon: DollarSign, mono: true },
     ]);
 
-    setLEAD_STAGES(LEAD_STAGES.map(stage => ({ stage, count: leads.filter(l => l.stage === stage).length })));
+    setFunnel(LEAD_STAGES.map(stage => ({ stage, count: leads.filter(l => l.stage === stage).length })));
 
     const teamStats = teamsList.map(t => {
       const mem = profiles.filter(p => p.team_id === t.id).length;
@@ -127,7 +127,7 @@ export default function GlobalCommandCenter() {
     );
   }
 
-  const maxLEAD_STAGES = Math.max(1, ...LEAD_STAGES.map(f => f.count));
+  const maxFunnel = Math.max(1, ...funnel.map(f => f.count));
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto animate-enter">
@@ -175,10 +175,10 @@ export default function GlobalCommandCenter() {
       </div>
 
       <div className="mb-5">
-        <h2 className="text-[15px] font-bold tracking-tight mb-2.5">Global LEAD_STAGES</h2>
+        <h2 className="text-[15px] font-bold tracking-tight mb-2.5">Global Funnel</h2>
         <div className="card !p-3 space-y-2">
-          {LEAD_STAGES.filter(f => f.count > 0).map(f => {
-            const pct = Math.max(2, Math.round((f.count / maxLEAD_STAGES) * 100));
+          {funnel.filter(f => f.count > 0).map(f => {
+            const pct = Math.max(2, Math.round((f.count / maxFunnel) * 100));
             return (
               <div key={f.stage}>
                 <div className="flex items-center justify-between text-[11px] mb-0.5">
@@ -191,7 +191,7 @@ export default function GlobalCommandCenter() {
               </div>
             );
           })}
-          {LEAD_STAGES.every(f => f.count === 0) && (
+          {funnel.every(f => f.count === 0) && (
             <p className="text-[12px] text-text-mutedLight dark:text-text-mutedDark text-center py-4">No leads yet across the network.</p>
           )}
         </div>

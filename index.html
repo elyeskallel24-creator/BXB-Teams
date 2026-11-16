@@ -3,8 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/webp" href="/logo.webp" />
+    <link rel="preload" href="/logo.webp" as="image" type="image/webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>BXB Teams</title>
+    <style>
+      /* Prevent white flash before React mounts */
+      body { background-color: #0A0A0C; margin: 0; color: #ffffff; }
+    </style>
   </head>
   <body>
     <div id="root"></div>

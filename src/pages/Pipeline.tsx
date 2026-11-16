@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { localToday } from '../lib/date';
-import { LEAD_STAGES, INACTIVE_STAGES, QUALIFIED_STAGES, stageBadgeClass } from '../lib/stages';
+import { LEAD_STAGES, INACTIVE_STAGES, stageBadgeClass } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Search, Layers, Building2 } from 'lucide-react';
