@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { localToday } from '../lib/date';
 import { LEAD_STAGES, INACTIVE_STAGES, QUALIFIED_STAGES, stageBadgeClass } from '../lib/stages';
 import { supabase } from '../supabase';
@@ -18,7 +18,123 @@ type Lead = {
   businesses: { name: string; industry: string | null; city: string | null } | null;
 };
 
+function StageColumn({ stage, leads, onOpen }: { stage: string; leads: Lead[]; onOpen: (lead: Lead) => void }) {
+  const today = localToday();
+  return (
+    <div className="shrink-0 w-full md:w-[300px]">
+      <div className="flex items-center justify-between mb-2 px-1">
+        <span className={stageBadgeClass(stage)}>{stage}</span>
+        <span className="text-[11px] font-semibold font-mono tabular-nums text-text-mutedLight dark:text-text-mutedDark">
+          {leads.length}
+        </span>
+      </div>
+      {leads.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-surface-borderLight dark:border-surface-borderDark px-4 py-8 text-center">
+          <p className="text-[12px] text-text-mutedLight dark:text-text-mutedDark">No leads</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {leads.map(lead => (
+            <button
+              key={lead.id}
+              onClick={() => onOpen(lead)}
+              className="card p-3 w-full text-left hover:border-brand-primary/30 active:scale-[0.995] transition-all"
+            >
+              <div className="flex items-start gap-2.5 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
+                  <Building2 size={15} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold tracking-tight truncate">{lead.businesses?.name || 'Unnamed'}</p>
+                  <p className="text-[11px] text-text-secondaryLight dark:text-text-secondaryDark truncate">
+                    {[lead.businesses?.industry, lead.businesses?.city].filter(Boolean).join(' · ') || 'No details'}
+                  </p>
+                </div>
+              </div>
+              {((lead.priority && lead.priority !== 'Medium') || lead.next_follow_up) && (
+                <div className="flex flex-wrap gap-1.5">
+                  {lead.priority && lead.priority !== 'Medium' && (
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/5 text-text-secondaryLight dark:text-text-secondaryDark">
+                      {lead.priority}
+                    </span>
+                  )}
+                  {lead.next_follow_up && (
+                    <span className={'text-[10px] font-semibold px-1.5 py-0.5 rounded-md ' + (lead.next_follow_up < today ? 'bg-state-dangerSoft text-state-danger' : 'bg-black/5 dark:bg-white/5 text-text-secondaryLight dark:text-text-secondaryDark')}>
+                      {new Date(lead.next_follow_up).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </span>
+                  )}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type Filter = 'active' | 'all' | 'mine' | 'overdue' | 'unassigned';
+
+export default function Pipeline() {
+  const { profile } = useAuth();
+  const toast = useToast();
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<Filter>('active');
+  const [activeStage, setActiveStage] = useState<string>('New Lead');
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const mobileBoardRef = useRef<HTMLDivElement>(null);
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => { fetchLeads(); }, []);
+
+  async function fetchLeads() {
+    const { data, error } = await supabase
+      .from('leads')
+      .select('id, business_id, stage, priority, next_follow_up, assigned_to, businesses(name, industry, city)')
+      .order('created_at', { ascending: false });
+    if (!error && data) setLeads(data as any);
+    setLoading(false);
+  }
+
+  async function handleUpdateStage(newStage: string) {
+    if (!selectedLead) return;
+    setIsUpdating(true);
+    const { data, error } = await supabase.from('leads').update({ stage: newStage }).eq('id', selectedLead.id).select();
+    if (error) {
+      console.error('Update stage error:', error);
+      toast.error('Error: ' + (error.message || error.details || 'Unknown error'));
+    } else if (!data || data.length === 0) {
+      toast.error('Update failed: Lead not found or permission denied.');
+    } else {
+      toast.success('Stage updated');
+      setSelectedLead({ ...selectedLead, stage: newStage });
+      fetchLeads();
+    }
+    setIsUpdating(false);
+  }
+
+  const today = localToday();
+
+  const filtered = leads.filter(l => {
+    const matchesSearch =
+      !searchQuery ||
+      (l.businesses?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (l.businesses?.industry || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (l.businesses?.city || '').toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+
+    switch (filter) {
+      case 'active': return !INACTIVE_STAGES.includes(l.stage);
+      case 'mine': return l.assigned_to === profile?.id;
+      case 'overdue': return !!l.next_follow_up && l.next_follow_up < today && !INACTIVE_STAGES.includes(l.stage);
+      case 'unassigned': return !l.assigned_to;
+      default: return true;
+    }
+  });
 
   const visibleLEAD_STAGES = filter === 'active'
     ? LEAD_STAGES.filter(s => !INACTIVE_STAGES.includes(s))

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { localToday } from '../lib/date';
 import { LEAD_STAGES, QUALIFIED_STAGES, INACTIVE_STAGES, stageBadgeClass } from '../lib/stages';
 import { supabase } from '../supabase';
@@ -42,6 +42,41 @@ type HistoryItem = {
 
 type Tab = 'overview' | 'activity' | 'qualification' | 'history';
 type Filter = 'all' | 'mine' | 'overdue' | 'qualified' | 'unassigned';
+
+export default function Leads() {
+  const { profile } = useAuth();
+  const toast = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showSheet, setShowSheet] = useState(false);
+  const [bizName, setBizName] = useState('');
+  const [bizIndustry, setBizIndustry] = useState('');
+  const [bizCity, setBizCity] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<Filter>(() => {
+    if (typeof window === 'undefined') return 'all';
+    const v = localStorage.getItem('bxb-leads-filter');
+    if (v === 'mine' || v === 'overdue' || v === 'qualified' || v === 'unassigned') return v;
+    return 'all';
+  });
+
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [isUpdatingStage, setIsUpdatingStage] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
+
+  useEffect(() => { fetchLeads(); }, []);
+
+  useEffect(() => {
+    const st = (location.state as any) || {};
+    if (typeof st.search === 'string') setSearchQuery(st.search);
+    if (st.openCreate) setShowSheet(true);
+  }, [location.state]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
