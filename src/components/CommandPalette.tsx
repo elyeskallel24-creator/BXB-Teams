@@ -34,7 +34,7 @@ const ALL_PAGES: Omit<PageItem, 'kind'>[] = [
   { path: '/pipeline', label: 'Pipeline', category: 'Workspace', icon: Layers, keywords: 'kanban stages board' },
   { path: '/tasks', label: 'Tasks', category: 'Workspace', icon: ListTodo, keywords: 'todo follow-up reminders' },
   { path: '/meetings', label: 'Meetings', category: 'Workspace', icon: Calendar, keywords: 'calendar schedule calls' },
-  { path: '/handovers', label: 'Handovers', category: 'Sales', icon: Wrench, keywords: 'technical requests assessment' },
+  { path: '/technical-handovers', label: 'Handovers', category: 'Sales', icon: Wrench, keywords: 'technical requests assessment' },
   { path: '/deals', label: 'Deals', category: 'Sales', icon: DollarSign, keywords: 'opportunities revenue value' },
   { path: '/proposals', label: 'Proposals', category: 'Sales', icon: FileText, keywords: 'offers quotes approval' },
   { path: '/targets', label: 'Targets', category: 'Sales', icon: Flag, keywords: 'goals quota objectives' },
@@ -42,7 +42,7 @@ const ALL_PAGES: Omit<PageItem, 'kind'>[] = [
   { path: '/playbooks', label: 'Playbooks', category: 'Enablement', icon: MapIcon, keywords: 'scripts templates market' },
   { path: '/training', label: 'Training', category: 'Enablement', icon: GraduationCap, keywords: 'learning modules onboarding' },
   { path: '/reports', label: 'Reports', category: 'Enablement', icon: BarChart3, keywords: 'analytics metrics performance' },
-  { path: '/', label: 'Updates', category: 'Community', icon: Home, keywords: 'announcements news feed' },
+  { path: '/updates', label: 'Updates', category: 'Community', icon: Home, keywords: 'announcements news feed' },
   { path: '/resources', label: 'Resources', category: 'Community', icon: FileText, keywords: 'documents pdf files library' },
   { path: '/leaderboard', label: 'Leaderboard', category: 'Community', icon: Trophy, keywords: 'ranking points top' },
   { path: '/teams', label: 'Teams', category: 'Administration', icon: Users, adminOnly: true, keywords: 'team management members' },
@@ -258,12 +258,12 @@ export function CommandPalette() {
         <div className="flex items-center justify-between gap-2 px-4 h-[36px] border-t border-surface-borderLight dark:border-surface-borderDark text-[10px] text-text-mutedLight dark:text-text-mutedDark">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <kbd className="border border-surface-borderLight dark:border-surface-borderDark rounded px-1 font-mono leading-none">↑</kbd>
-              <kbd className="border border-surface-borderLight dark:border-surface-borderDark rounded px-1 font-mono leading-none">↓</kbd>
+              <kbd className="border border-surface-borderLight dark:border-surface-borderDark rounded px-1 font-mono leading-none">?</kbd>
+              <kbd className="border border-surface-borderLight dark:border-surface-borderDark rounded px-1 font-mono leading-none">?</kbd>
               navigate
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="border border-surface-borderLight dark:border-surface-borderDark rounded px-1 font-mono leading-none">↵</kbd>
+              <kbd className="border border-surface-borderLight dark:border-surface-borderDark rounded px-1 font-mono leading-none">?</kbd>
               open
             </span>
           </div>

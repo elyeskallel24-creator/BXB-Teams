@@ -2,288 +2,1183 @@
   id: string;
   level: 1 | 2 | 3;
   title: string;
-  roles: string[]; // 'all', 'admin'
+  roles: string[];
   content: string;
 };
 
 export const ACADEMY_CONTENT: Chapter[] = [
+  // ============ LEVEL 1: GETTING STARTED ============
   {
     id: 'ch-1',
     level: 1,
-    title: 'Welcome to BXB',
+    title: 'Welcome to BXB Teams',
     roles: ['all'],
-    content: `Welcome to BXB! BXB is an international freelance technology network led by its founder, Elyes Kallel. We work with independent sales teams and technical collaborators in different countries.
-    
-Our network helps businesses improve their work through technology. Some services include AI solutions, business automation, software development, websites, and API integrations.
+    content: `BXB Teams is the daily workspace where you manage your sales work.
 
-You do not need to be a programmer to work with BXB as a sales representative. Your main job is to find businesses that may need our services and connect them with BXB.
+This app helps you track leads, record activities, schedule meetings, qualify opportunities, submit technical requests and see your performance.
 
-**Important:** Use the application to record your real work. Do not create fake activities or fake business opportunities just to increase your numbers.`
-  },
-  {
-    id: 'ch-2',
-    level: 1,
-    title: 'Getting Started',
-    roles: ['all'],
-    content: `Before using the application, your team administrator will provide you with a User ID (e.g., SALES-0001). Keep it safe. Do not share your password.
+BXB provides technology services (AI solutions, automation, websites, software, integrations) to businesses, teams, organisations, professionals, and institutions. Your job as a sales rep is to find these potential clients and connect them with the BXB technical team.
 
-**Creating your account:**
-1. Open the BXB application.
-2. Find the account claiming section.
-3. Enter your User ID.
-4. Create a strong password.
-5. Upload a profile picture if asked.
-6. Complete setup.
+Additionally, BXB has a store called **BXB Tools**, which offers monthly subscription-based tools. As a sales rep, you are also tasked with promoting and selling these subscriptions.
 
-**Logging in:**
-Enter your User ID and password. Press login. You will arrive at your dashboard.
-
-**Installing on your phone:**
-BXB is a Progressive Web Application (PWA). Look for the "Add to Home Screen" option in your phone's browser menu to install it like a real app.`
+**Important:** Record what really happens. Do not create fake leads, fake calls or fake meetings. Honest data is the only data that helps you.`
   },
   {
     id: 'ch-3',
     level: 1,
     title: 'Understanding the App',
     roles: ['all'],
-    content: `On a phone, the main navigation is at the bottom:
-- **Home:** Your dashboard.
-- **Leads:** The businesses you are working with.
-- **Pipeline:** The stages of your sales.
-- **Tasks:** Your daily to-do list.
-- **More:** All other sections (Meetings, Deals, Proposals, etc.).
+    content: `On mobile, the main navigation is at the bottom:
+- **Home:** Your dashboard
+- **Leads:** The businesses you work with
+- **Pipeline:** Visual stages of your sales
+- **Tasks:** Your to-do list
+- **More:** All other pages (Meetings, Deals, Proposals, Resources, Profile, etc.)
 
-**The Notification Bell:**
-The bell at the top shows important updates (new leads, upcoming meetings, overdue tasks). Open it and read the messages.`
+On desktop, a sidebar on the left shows every page.
+
+**The Notification Bell** (top of screen): shows unread updates. Check it every time you log in.`
   },
   {
     id: 'ch-4',
     level: 1,
     title: 'Your Home Dashboard',
     roles: ['all'],
-    content: `The dashboard is the first page you check when you start working. It shows your daily priorities.
+    content: `The dashboard is the first page you see after logging in.
 
-**Daily Routine:**
-1. Check today's tasks.
-2. Check overdue work (tasks that are late).
-3. Check your meetings.
-4. Check active leads.
-5. Read notifications.
+**Daily routine:**
+1. Check today's tasks
+2. Check overdue items (tasks or follow-ups with past dates)
+3. Check upcoming meetings
+4. Check active leads
+5. Read new notifications
 
-**Overdue Task:**
-A task whose due date has passed and is not completed. Do not ignore them. Complete them or change the date.`
+**Overdue** means a due date has passed and the item is not complete. Never ignore overdue items — complete them or reschedule with a real reason.`
   },
   {
     id: 'ch-5',
     level: 1,
     title: 'Understanding Leads',
     roles: ['all'],
-    content: `A lead is a business that may become a BXB client.
+    content: `A lead is a potential client that may become a BXB customer. This could be a business, team, organisation, professional, or institution. You can also pitch **BXB Tools** (monthly software subscriptions) to them.
 
-**What makes a good lead?**
-- A real business.
-- Correct information (phone, email).
-- A possible need for BXB services.
+**What makes a good lead:**
+- A real, operating business
+- Correct contact information (phone, email)
+- A possible need for a BXB service
+- A reasonable reason to contact them
 
 **Creating a lead:**
-1. Open Leads.
-2. Press "New Lead".
-3. Search first to check for duplicates.
-4. Fill in the business name, industry, and city.
-5. Save.
+1. Open Leads
+2. Press New Lead
+3. Search the business name first to avoid duplicates
+4. Fill in business name, industry, city
+5. Save
 
-**Duplicate Leads:**
-If you enter a business that already exists, the app may warn you. Do not create another record. Ask your team leader.`
-  },
-  {
-    id: 'ch-6',
-    level: 2,
-    title: 'The Sales Pipeline',
-    roles: ['all'],
-    content: `The pipeline shows how far a business has moved in the sales process.
-
-**Main Stages:**
-- **New Lead:** Just added.
-- **Researching:** Learning about the business.
-- **Contacted:** You reached someone.
-- **Qualified:** The business passed the qualification review.
-- **Meeting Scheduled:** A meeting is arranged.
-- **Proposal Sent:** An offer was sent.
-- **Won / Lost:** The final result.
-
-**Rule:** Do not move a lead forward just to make your numbers look better. The pipeline must show the real situation.`
+**Duplicates:** If the app warns that a business may already exist, do not create another record. Ask your team lead to review ownership.`
   },
   {
     id: 'ch-7',
     level: 1,
     title: 'Recording Activities',
     roles: ['all'],
-    content: `An activity is something you did while working on a lead (a call, an email, a message).
+    content: `An activity is anything you did while working on a lead — a call, an email, a WhatsApp message, a meeting.
 
 **Logging a call:**
-1. Open the lead.
-2. Go to the Activity tab.
-3. Select "Phone Call".
-4. Select the outcome (No Answer, Interested, etc.).
-5. Write a short, clear note.
+1. Open the lead
+2. Tap the Activity tab
+3. Tap Log
+4. Select type (Phone Call)
+5. Select outcome (No Answer, Interested, etc.)
+6. Write a short note
+7. Add a follow-up date if needed
+8. Save
 
 **Good note:** "Spoke with the manager. Interested in a new website. Follow-up Friday."
-**Bad note:** "Good call."`
+**Bad note:** "Good call."
+
+**Rule:** Every call, email or message that matters should be logged. Your future self will thank you.`
   },
   {
     id: 'ch-8',
     level: 1,
     title: 'Tasks & Follow-ups',
     roles: ['all'],
-    content: `A task is something you need to do.
+    content: `A task is something you need to do. Tasks keep your follow-ups from getting lost.
 
 **Creating a task:**
-1. Open Tasks.
-2. Press "New Task".
-3. Write a clear title (e.g., "Call ABC Restaurant").
-4. Select priority (Urgent, High, Medium, Low).
-5. Set a due date.
-6. Save.
+1. Open Tasks
+2. Press New Task
+3. Write a clear title (e.g. "Call ABC Restaurant")
+4. Pick a priority (Urgent / High / Medium / Low)
+5. Set a due date
+6. Save
 
-**Rule:** Every active business opportunity should have a clear next action.`
+**Rule:** Every active opportunity should have a clear next action. If you do not know the next step, set a task to figure it out.`
+  },
+  {
+    id: 'ch-22',
+    level: 1,
+    title: 'Your Daily Work Routine',
+    roles: ['all'],
+    content: `**When you start working:**
+1. Open BXB
+2. Check the dashboard
+3. Read notifications
+4. Check today's tasks
+5. Check overdue follow-ups
+6. Check meetings
+
+**During the day:**
+1. Open your assigned leads (Leads assigned to you by your Sales Lead)
+2. Research the businesses
+3. Contact prospects
+4. Log every interaction
+5. Create follow-up tasks
+6. Schedule meetings
+7. Submit technical handovers when needed
+
+**Before finishing:**
+1. Review your activities
+2. Complete finished tasks
+3. Update unfinished tasks
+4. Check upcoming meetings
+5. Make sure every important lead has a next action
+
+**The most important habit:** Never finish a serious opportunity without knowing what happens next.`
+  },
+
+  // ============ LEVEL 2: SALES REP — EVERY FEATURE IN DETAIL ============
+  {
+    id: 'ch-25',
+    level: 2,
+    title: 'Leads — Complete Guide',
+    roles: ['all'],
+    content: `The Leads page is your main working list. Every prospect, contact, business, team, organisation, professional, or institution lives here.
+
+**The Lead List**
+When you open Leads, you see every client you are allowed to see (your own + your team's, depending on your role). Each card shows:
+- Client name (Business, Team, Org, etc.)
+- Industry, city, country
+- Current stage (badge)
+- Priority (if not Medium)
+- Next follow-up date (red if overdue)
+
+**Filters and search**
+- **Search bar:** matches name, industry or city
+- **All / Mine / Overdue / Qualified / Unassigned:** tabs above the list
+- **Saved filter:** your last filter choice is remembered on this device
+
+**Opening a lead**
+Tap any lead card to open the Lead Details sheet. It has four tabs:
+- **Overview:** stage, priority, contact details, client info, quick actions
+- **Activity:** every call, email, message, meeting and note logged for this lead
+- **Qualification:** the 5-area qualification form (Draft/Submitted/Approved/Returned)
+- **History:** every stage change and every owner change, with who and when
+
+**Creating a lead**
+1. Tap **New Lead**
+2. Fill **Client name** (required)
+3. Fill industry and city (optional but recommended)
+4. Tap **Save**
+
+The app creates two records: a Client Profile and a Lead. Your user becomes the owner automatically. If you skip industry and city, later filters won't be able to sort this lead. Do not skip them when you can fill them.
+
+**Quick actions from the Overview tab**
+- **Schedule:** opens the New Meeting form with this lead pre-linked
+- **Follow-up:** opens the New Task form with this lead pre-linked
+- **Tech Request:** opens the New Handover form with this lead pre-linked
+- **Log Call:** switches you to the Activity tab so you can log an interaction
+
+**Assignment and ownership**
+- You can only work with leads that are assigned to you or your team
+- If a lead is unassigned and you are a rep, you cannot self-assign. Ask your team lead
+- If you cannot see a lead, it belongs to another team or is not assigned yet
+
+**Rules that matter**
+- Search before creating. Duplicates hurt everyone
+- Log real outcomes, not optimistic ones. If the client said "maybe", select "Needs More Information", not "Interested"
+- Move the stage only when the real-world situation changed. Do not move to Qualified unless you submitted the qualification and it was approved`
+  },
+  {
+    id: 'ch-6',
+    level: 2,
+    title: 'Pipeline — Complete Guide',
+    roles: ['all'],
+    content: `The Pipeline page shows your leads grouped by stage, like a board.
+
+**On desktop**
+Each stage is a column. Leads are cards inside each column. Scroll horizontally to see every stage. Drag is not enabled — you change a lead's stage by opening it and using the Stage dropdown.
+
+**On mobile**
+You see one stage at a time as a swipeable card. A stage picker above shows counts per stage. Tap a stage chip to jump to it. Swipe left and right to move between stages.
+
+**The stages (in order)**
+1. New Lead — just created
+2. Researching — you are gathering info
+3. Ready to Contact — you have enough to call
+4. Contact Attempted — you tried once
+5. Contacted — you reached someone
+6. Response Received — they replied
+7. Qualified — passed qualification review
+8. Meeting Proposed — you proposed a time
+9. Meeting Scheduled — meeting confirmed
+10. Discovery Completed — the meeting happened
+11. Technical Review — BXB is assessing
+12. Proposal Preparation — proposal being prepared
+13. Proposal Sent — client has the offer
+14. Negotiation — discussing terms
+15. Won — client accepted
+16. Lost — deal did not happen
+17. Nurture — not now, try later
+18. Disqualified — not a fit
+19. Duplicate — record is a duplicate
+
+**Filters**
+The chips above the board filter which leads appear:
+- **Active:** every stage except Won, Lost, Nurture, Disqualified, Duplicate
+- **All:** every stage
+- **Mine:** only leads assigned to you
+- **Overdue:** leads with a follow-up date in the past
+- **Unassigned:** leads with no owner (admins and team leads only see the full list)
+
+**Changing a stage**
+1. Tap a lead card to open the detail sheet
+2. Find **Current stage**
+3. Select the new stage from the dropdown
+4. The change is saved instantly
+5. The previous stage is recorded in the History tab
+
+**Rules**
+- Do not skip stages. Going from Contact Attempted directly to Won is dishonest data
+- Do not change a stage backward without a real reason (e.g. client said "not now" so move to Nurture)
+- The pipeline is not a leaderboard. Moving cards does not earn you points — only verified outcomes do`
   },
   {
     id: 'ch-9',
     level: 2,
-    title: 'Meetings',
+    title: 'Meetings — Complete Guide',
     roles: ['all'],
-    content: `Meetings give BXB an opportunity to understand a business deeply.
+    content: `Meetings are the most important step in the sales process. They are where business and money are made. As a sales rep, you will create the meeting. The meeting must include: You, the Sales Lead, the BXB Founder/Tech Lead, and the Client. At the end of this meeting, BXB will set the cuts and everyone gets paid.
 
-**Creating a meeting:**
-1. Open Meetings (or the lead).
-2. Press "New Meeting".
-3. Enter title, date, and time.
-4. Add a meeting link (online) or location (in-person).
-5. Save.
+**Creating a meeting**
+1. Open **Meetings** from the More menu (or open a lead and tap **Schedule**)
+2. Tap **New Meeting**
+3. Link the lead (optional, but strongly recommended)
+4. Fill in **Title** (required). Example: "Discovery call with ABC Restaurant"
+5. Pick a **Type**: Discovery, Follow-up, Proposal Discussion, Internal, Other
+6. Pick the **Date** (required)
+7. Pick **Start time** (required) and **End time** (optional)
+8. Add a **Meeting link** (Meetings are online only). The client chooses the platform (Google Meet, Zoom, Discord, or Teams). You must confirm this choice with the client.
+9. Add a **Location** for in-person meetings (office, address)
+10. Add optional notes or an agenda
+11. Tap **Save Meeting**
 
-**Time Zones:** BXB works globally. Always confirm the time in the client's local time zone.
+**Time zones**
+The app stores the meeting in your local timezone. If the client is in a different country, write the meeting time in their time zone in the Notes field so there is no confusion.
 
-**Statuses:** Proposed, Confirmed, Completed, Cancelled. Do not mark a meeting as Confirmed until the client accepts.`
+**Meeting statuses**
+- **Proposed:** You suggested the time, client hasn't confirmed
+- **Awaiting Confirmation:** Client acknowledged but hasn't confirmed
+- **Confirmed:** Client agreed. Use this status only after they accepted
+- **Completed:** The meeting happened. Use this only after the meeting ends
+- **Cancelled:** Meeting was cancelled
+- **Rescheduled:** Meeting moved to a new time
+- **No Show:** Client didn't attend
+
+**Changing the status**
+On the meeting card, three buttons appear: **Confirm**, **Complete**, **Cancel**. Use them only when the situation matches the label. Do not use "Complete" for meetings that have not happened yet.
+
+**Tabs: Upcoming vs Past**
+- Upcoming shows meetings with dates today or later
+- Past shows meetings with dates before today
+- Both tabs show a count so you can see your load at a glance
+
+**Rules**
+- Never mark a meeting Completed if it didn't happen. Instead, mark it No Show or Cancelled
+- If a meeting is rescheduled, update the date. Do not create a second meeting for the same conversation
+- Log the outcome after the meeting in the Activity tab of the linked lead`
   },
   {
     id: 'ch-10',
     level: 2,
-    title: 'Qualifying a Lead',
+    title: 'Qualification — Complete Guide',
     roles: ['all'],
-    content: `Qualification means checking if a business is a good fit for BXB.
+    content: `Qualification is the honest check: does this lead deserve BXB's technical and commercial time?
 
-**The 5 Areas:**
-1. **Business Fit:** Does the business match BXB services?
-2. **Identified Problem:** What problem do they have?
-3. **Decision-Maker:** Are you speaking to the person who can say "yes"?
-4. **Interest:** Did they ask for information or agree to a meeting?
-5. **Commercial Readiness:** Do they have a budget and timeline?
+**When to qualify**
+After you have had a real conversation with the business and understand their problem. Not before. Do not guess what you think the business needs.
 
-Submit the qualification for review. If returned, read the comments and correct it.`
+**Opening the qualification form**
+1. Open the lead
+2. Tap the **Qualification** tab
+3. Fill in each field
+
+**The 5 sections and what to write**
+
+**1. Business Fit**
+Is the business real and operating? Does it fit BXB's target market (SMEs, agencies, restaurants, retail, services)? Is there any possible connection to a BXB service?
+
+**2. Identified Problem**
+What problem is the business trying to solve? What is not working today? Use their words, not yours. Example: "Manual booking process — receptionist overwhelmed during peak hours."
+
+**3. Decision-Maker**
+Who can approve a project? Owner? General Manager? Operations lead? If you only spoke to reception, write "Reception only — decision-maker not yet identified." Do not write a guess.
+
+**4. Interest**
+What evidence do you have of real interest? Did they ask for info? Did they agree to a meeting? Did they explain their need? Interest is not "they said hello". Interest is "they explained their problem in detail".
+
+**5. Commercial Readiness**
+Are they actively planning a project? Do they have a budget range (only if they volunteered it)? Do they have a timeline? If they said "we're thinking about it", mark as "Not ready".
+
+**Saving**
+- **Save Draft:** You are still filling it in
+- **Submit for Review:** Ready for admin review
+
+**Review outcomes**
+- **Draft:** In progress
+- **Submitted:** Waiting for admin review
+- **Approved:** The reviewer accepted the qualification. The lead can move to "Qualified" stage
+- **Returned:** The reviewer wants changes. Read the reason, correct the form and resubmit
+
+**The Score**
+The app computes a score: 20 points per section that has real content, so 0–100. The score is a quick sanity check, not a sales target. A well-written 60 is better than a guessed 100.
+
+**Rules**
+- Do not submit a qualification with empty fields
+- Do not overstate interest to get approval
+- If the reviewer returns it, read their note carefully before resubmitting — do not resubmit unchanged`
   },
   {
     id: 'ch-11',
     level: 2,
-    title: 'Technical Handovers',
+    title: 'Technical Handovers — Complete Guide',
     roles: ['all'],
-    content: `A technical handover is a request to the BXB technical team to assess a project.
+    content: `A technical handover is a request to the BXB technical team to assess a client's project.
 
-**When to submit:**
-When the business has a real problem and you have enough information for technical review.
+**When to submit a handover**
+Only when:
+- The business explained a real problem
+- You have enough information for a technical review
+- The opportunity is qualified or close to qualified
+- The next step requires technical feasibility assessment
 
-**Writing a good request:**
-Explain the problem clearly. 
+Do not submit a handover for a raw lead. Do not submit without a conversation.
+
+**Creating a handover**
+1. Open **Handovers** from the More menu (or from a lead via **Tech Request**)
+2. Tap **New Request**
+3. Link the lead (optional but recommended)
+4. **Request title:** a short, specific title. Bad: "New project". Good: "Restaurant POS automation"
+5. **Project type:** Website, Web Application, AI Solution, Automation, API Integration, Custom Software, Other
+6. **Urgency:** Low / Medium / High / Critical
+7. **Client problem:** what the business is trying to fix
+8. **Current solution:** how they handle it today
+9. **Expected result:** what success looks like to them
+10. **Desired solution:** what they think they need (or what you would propose)
+11. **Existing software:** tools they already use
+12. **Existing website:** URL
+13. **Integrations needed:** any known API or platform connections
+14. **Technical restrictions:** anything you already know they cannot or will not change
+15. **Budget info:** only if the client volunteered it
+16. **Timeline:** "ASAP", "2 months", "Q2 next year" — whatever they said
+17. **Competitors:** who else they are considering
+18. Tap **Submit Request**
+
+**Writing a good handover**
 Bad: "Client wants AI."
-Good: "The client receives many questions via social media. They want an AI assistant to answer common questions and direct complex ones to staff."
+Good: "The client receives 40–60 questions per day on WhatsApp and Instagram. They respond manually and are losing inquiries after hours. They want an AI assistant that answers common questions and hands off complex ones to staff."
 
-**Statuses:** Draft, Submitted, Under Assessment, Feasible, Not Feasible.`
+**Statuses**
+- **Draft:** Created but not submitted
+- **Submitted:** Sent to the technical team
+- **Awaiting Review:** In the queue
+- **Under Technical Assessment:** Being evaluated
+- **More Information Required:** The tech team needs something from you
+- **Feasible / Feasible With Changes / Not Feasible:** The verdict
+- **Proposal Preparation:** Moving to commercial
+- **Approved:** Ready for the proposal
+- **Closed:** Finished
+
+**Responding to "More Information Required"**
+1. Open the handover
+2. Read the status and any notes from the technical team
+3. Contact the client for the missing info
+4. Do not create a new handover — update the existing one
+
+**What you must NEVER do**
+- Promise a specific feature
+- Promise a price or a discount
+- Promise a delivery date
+- Tell the client the project is feasible before the tech team says so
+
+The handover is your question to the technical team. Their verdict is the answer.`
   },
   {
     id: 'ch-12',
     level: 2,
-    title: 'Deals & Proposals',
+    title: 'Deals — Complete Guide',
     roles: ['all'],
-    content: `A deal is a business opportunity being managed commercially. 
+    content: `A Deal is a qualified opportunity that has moved into commercial management. Deals are how BXB actually makes revenue.
 
-**Proposal:** A document explaining the solution, price, timeline, and deliverables.
+**What lives in a Deal**
+- The business/client
+- The service being proposed
+- An estimated value and currency
+- An expected close date
+- A deal stage
+- Notes about the negotiation
 
-**Your role:**
-As a sales rep, you collect client info and share feedback. You do NOT edit approved prices or promise discounts.
+**The 10 deal stages**
 
-**Versions:** A proposal may have multiple versions (V1, V2). Always share the correct approved version.`
+1. **Opportunity Created** — Deal registered. No technical work done yet
+2. **Technical Assessment** — The tech team is reviewing feasibility
+3. **Pricing Review** — Commercial team is checking the price
+4. **Proposal Draft** — The proposal is being written
+5. **Internal Approval** — Waiting for admin approval on the numbers
+6. **Proposal Approved** — Admin approved the proposal internally
+7. **Proposal Sent** — Client has received the offer
+8. **Negotiation** — Client is discussing or asking for changes
+9. **Won** — Client accepted
+10. **Lost** — Client declined or opportunity ended
+
+**Your role at each stage**
+
+- **Opportunity Created / Technical Assessment:** Collect client info, answer tech questions, do not promise
+- **Pricing Review:** Share cost data honestly if asked; do not negotiate price yourself
+- **Proposal Draft / Internal Approval:** Wait. Do not share the draft with the client
+- **Proposal Approved:** Do not send the proposal yourself unless an admin asked you to
+- **Proposal Sent:** Follow up at the agreed time
+- **Negotiation:** Record every client request verbatim. Escalate any change to an admin
+- **Won:** Confirm the final outcome in the app
+- **Lost:** Write down why, honestly. Lost reasons are gold for future deals
+
+**Changing a stage**
+1. Open the deal
+2. Find **Update stage**
+3. Pick the new stage
+4. The change is recorded with who and when
+
+**Rules**
+- Do not skip from Opportunity Created to Proposal Sent. Every stage reflects real work
+- Do not move to Negotiation before the client has actually responded to the proposal
+- Do not move to Won before the client has confirmed in writing
+- Do not move to Lost without recording the reason
+
+**The Pipeline value card**
+At the top of the Deals page, a card shows your total open deal value in your dominant currency. Deals in other currencies are not added into that total — they exist but the card cannot combine them. Never quote a mixed-currency total to a client.
+
+**If you make a mistake**
+There is no edit UI yet for deals. If you need to fix a title or value, ask your admin to update it in the database. Otherwise create a new deal correctly and mark the old one as Lost with reason "Created in error".`
+  },
+  {
+    id: 'ch-23',
+    level: 2,
+    title: 'Proposals — Complete Guide',
+    roles: ['all'],
+    content: `A Proposal is the formal written offer. It goes to the client only after internal approval.
+
+**What lives in a Proposal**
+- Client details
+- Service description
+- Proposed solution
+- Scope of work
+- Deliverables
+- Exclusions (what is NOT included)
+- Estimated timeline
+- Pricing and currency
+- Payment milestones
+- Maintenance arrangements
+- Version number
+- Approval status
+- Expiration date
+
+**Creating a proposal**
+1. Open **Proposals** from the More menu
+2. Tap **New Proposal**
+3. Fill in title, service description, proposed solution
+4. Fill in scope, deliverables, exclusions
+5. Fill in timeline, pricing and currency
+6. Fill in milestones and maintenance
+7. Set an expiration date
+8. Tap **Save Proposal**
+
+The proposal starts as **Draft** with version 1.
+
+**Approval workflow**
+
+**Step 1 — Request approval (you do this)**
+On a Draft proposal, tap **Request approval**. This:
+- Creates an approval record marked "Pending"
+- Moves the proposal to **Pending Approval**
+- Sends an in-app notification to admins
+
+**Step 2 — Admin review (admin does this)**
+An admin reviews the numbers and either Approves or Rejects.
+
+**Step 3 — You receive the result**
+The proposal now shows either **Approved** or **Rejected**.
+- Approved: You can send it to the client (or an admin will)
+- Rejected: Read any comments, fix the proposal, and request approval again
+
+**What you can and cannot do**
+- **Can:** Edit a Draft proposal
+- **Cannot:** Change an Approved proposal's price or scope
+- **Cannot:** Send an unapproved proposal to a client as if it were approved
+- **Cannot:** Promise a discount without admin approval
+
+**Proposal versions**
+Every time the content of a proposal changes and the approval status stays the same, the app creates a new version automatically (V1, V2, V3...). The old version is saved forever.
+
+If a client asks "did you change something?", the version number tells you. Always share the latest approved version.
+
+**Expiration**
+Every proposal has an expiration date. If a proposal expires, it is no longer valid as written. Create a new version before sending again.
+
+**Rules**
+- Do not create a proposal without a deal or a real qualified lead behind it
+- Do not promise anything in a proposal that has not been approved
+- When in doubt, ask the admin`
   },
   {
     id: 'ch-13',
     level: 2,
-    title: 'Understanding BXB Services',
+    title: 'Services Catalogue — Complete Guide',
     roles: ['all'],
-    content: `You do not have to be a technical expert, but you must understand what we sell.
+    content: `BXB has two main product lines you need to sell:
 
-- **AI Solutions:** Software that answers questions or organizes data.
-- **Business Automation:** Making repeated work happen with less manual effort.
-- **API Integrations:** Connecting two different software systems.
-- **Custom Software:** Software built for a specific business need.
-- **Websites & Apps:** Online platforms for businesses.
+1. **Services Catalogue:** Custom technology services (AI, automation, websites, software, etc.).
+2. **BXB Tools:** A store of monthly subscription-based tools for businesses and professionals.
 
-**Golden Rule:** Do not start by trying to sell a feature. Start by understanding the business problem.`
+The Services page is the catalogue of our custom services. Every service has a knowledge card.
+
+**What is in a service card**
+- Name and category
+- Short description
+- Marketing description (approved sales copy)
+- Problems solved
+- Typical clients
+- Example use cases
+- Info to ask the prospect
+- Common questions
+- Do not promise (guardrails)
+- How BXB delivers it
+
+**Using the catalogue**
+1. Open **Services** from the More menu
+2. Filter by category chips or search
+3. Tap any service to read its card
+4. Use the marketing description when writing to a client
+5. Use the "Info to ask" section as a checklist before a meeting
+
+**The 11 categories**
+AI Solutions, Business Automation, API Integrations, Custom Software, Websites, Web Applications, UI/UX Design, Dashboards, Business Management Systems, Digital Transformation, E-Marketing and Digital Services.
+
+**Rules**
+- Use approved marketing copy. Do not invent claims
+- Read "Do not promise" for every service before a client call. It lists what the technical team has flagged as risky
+- If a client asks for a service not in the catalogue, submit a technical handover instead of guessing`
   },
   {
     id: 'ch-14',
     level: 2,
-    title: 'Resources & Playbooks',
+    title: 'Resources — Complete Guide',
     roles: ['all'],
-    content: `The Resources Library contains PDFs, brochures, scripts, and videos.
+    content: `Resources is a PDF library with everything you need for client conversations.
 
-Use the Search bar to find what you need.
-Use Bookmarks to save important documents.
-Playbooks are guides that explain how to approach sales in specific countries.
+**What is in Resources**
+- Company introduction
+- Brochures
+- Sales scripts
+- Service explanations
+- Training documents
+- Country-specific material
 
-**Rule:** Only use approved materials. Do not share private internal documents with clients.`
+**Opening a resource**
+1. Open **Resources** from the More menu
+2. Search by title or filter by category
+3. Tap the file icon on the left of a card to open the PDF in a new tab
+4. The file opens securely through a time-limited signed link
+
+**Bookmarks**
+Every resource card has a bookmark icon. Tap it to save the resource to your **Saved** filter. The Saved filter shows only your bookmarks. Tap again to remove.
+
+**Upload (admins only)**
+Admins see an **Upload** button. Files must be PDF and under 50 MB. Give a clear title and category so others can find it.
+
+**Rules**
+- Only share approved material with clients
+- Do not modify official descriptions
+- Do not share private internal documents
+- If you need a resource that is not there, ask your team lead to request it from an admin`
   },
+  {
+    id: 'ch-24',
+    level: 2,
+    title: 'Playbooks — Complete Guide',
+    roles: ['all'],
+    content: `A Playbook is a country- or market-specific sales guide.
+
+**What is in a playbook**
+- Country and language
+- Target industries
+- Prospecting strategies
+- Communication guidance
+- Calling scripts
+- Email templates
+- Messaging templates
+- Discovery questions
+- Common objections
+- Market examples
+- Compliance guidance
+
+**Using a playbook**
+1. Open **Playbooks** from the More menu
+2. Tap the playbook for your country (or the "Universal" one if yours is not there yet)
+3. Read the relevant section before your calls
+4. Do not read the whole thing every day — come back to the specific section you need
+
+**Universal vs country-specific**
+- **Universal** playbooks apply to everyone. They are the foundation
+- Country-specific playbooks extend the universal one with local guidance
+
+**Rules**
+- Do not invent your own scripts. If a script exists, use it
+- Adapt tone to the client, not the substance
+- If the playbook's guidance conflicts with what you hear from a client, report it to your team lead — do not silently override`
+  },
+  {
+    id: 'ch-26',
+    level: 2,
+    title: 'Tasks — Complete Guide',
+    roles: ['all'],
+    content: `Tasks are how you remember follow-ups. Without tasks, leads go cold.
+
+**The 4 tabs**
+- **Today:** tasks due today
+- **Overdue:** tasks with a past due date, still not done
+- **Upcoming:** tasks due tomorrow or later
+- **Done:** tasks you already completed
+
+Each tab shows a count so you know your workload at a glance.
+
+**Creating a task**
+1. Open **Tasks**
+2. Tap **New Task**
+3. Fill in **Title** (required). Be specific
+4. Add an optional description
+5. Pick a priority: Low, Medium, High, Urgent
+6. Set a due date (recommended — tasks with no due date become invisible in the tabs)
+7. Set a due time (optional)
+8. Link the task to a lead (optional but recommended — the lead name shows on the card)
+9. Tap **Save Task**
+
+**Marking a task done**
+Tap the circle on the left of any task card. The task moves to the **Done** tab. Tap again to reopen it.
+
+**Editing**
+Tasks can be rescheduled from the detail view. Right now there is no full edit; you can only change status and completion. If you need to change the title or lead, delete the task and create a new one (delete is available from the detail view for admins; for reps, mark as Cancelled via the database is not possible — you must ask an admin).
+
+**Priority rules**
+- **Urgent:** client is waiting or the opportunity is at risk
+- **High:** important within 48 hours
+- **Medium:** normal daily work
+- **Low:** can wait a week
+
+Do not mark everything Urgent. It defeats the purpose.
+
+**The invisible-task trap**
+If you create a task with no due date, it will not appear in Today, Overdue or Upcoming. Only the All filter (if you have one) would show it. Always set a due date.
+
+**Rules**
+- Every active lead should have at least one open task with a real due date
+- Close a task only when you actually did the work
+- If you cannot do a task by its due date, change the date — do not just ignore it`
+  },
+  {
+    id: 'ch-27',
+    level: 2,
+    title: 'Notifications — Complete Guide',
+    roles: ['all'],
+    content: `Notifications tell you when something needs your attention.
+
+**What triggers a notification**
+- A lead is assigned to you
+- A task you own becomes overdue
+- A meeting is approaching
+- An admin comments on your proposal
+- A technical handover is returned to you with "More Information Required"
+- An admin posts an important update
+- A proposal you requested is approved or rejected
+
+**Where to see them**
+Tap the bell icon in the header. The bell shows a red dot when you have unread notifications. Tap it to open the full Notifications page.
+
+**The Notifications page**
+- **All tab:** every notification
+- **Unread tab:** only notifications you have not marked as read
+- Tap any notification to open it — it usually links to the relevant record
+- **Mark all read:** button in the top-right (only appears when you have unread)
+
+**Rules**
+- Check notifications at the start of every work session
+- Do not leave old notifications unread for days — they lose meaning
+- If a notification links to a lead or task, complete the action before moving on`
+  },
+  {
+    id: 'ch-28',
+    level: 2,
+    title: 'Reports — Complete Guide',
+    roles: ['all'],
+    content: `Reports is where you see your performance as numbers.
+
+**The 5 time ranges**
+- Today
+- This week
+- This month
+- This quarter
+- This year
+
+Every number on the page reflects the currently selected range. Tap a chip to change it.
+
+**The 6 KPIs**
+- **Total leads:** leads created in this range
+- **Qualified:** leads in a qualified stage, created in this range
+- **Meetings held:** meetings with status Completed, dated in this range
+- **Won deals:** deals in Won stage, created in this range
+- **Revenue:** total value of won deals, in your dominant currency
+- **Conversion:** won deals divided by total leads (a percentage)
+
+**The sections below**
+- **Pipeline funnel:** how many of your leads (created in this range) are in each stage now
+- **Leads by industry:** top 6 industries in this range
+- **Deals by stage:** how your deals are distributed across stages
+
+**Currency honesty**
+Your Revenue card only shows one currency at a time (the dominant one). If you have deals in multiple currencies, a small note under the KPI tells you how many other currencies are not included. Never quote a mixed-currency total to anyone — it is meaningless.
+
+**Export**
+The **Export** button in the top-right downloads a CSV with everything visible on the page. Every export is logged in the audit trail — do not export data you should not share.
+
+**How to use Reports**
+- Weekly review: check your conversion number. Is it going up?
+- Monthly review: check which industries you win in. Focus there
+- Quarterly review: check which stages are stuck. Those are your process gaps
+- Do not obsess over daily numbers — they fluctuate too much to be meaningful`
+  },
+
+  // ============ LEVEL 3: SALES LEAD GUIDE ============
   {
     id: 'ch-15',
     level: 3,
-    title: 'Team Leader Guide',
+    title: 'Your Role as a Sales Lead',
     roles: ['admin'],
-    content: `As a Team Leader, your job is to organize and support your team.
+    content: `A sales lead organizes and supports a team of sales representatives.
 
-**Responsibilities:**
-- Review team activity and follow-ups.
-- Assign leads to representatives.
-- Monitor meetings and qualified opportunities.
-- Help reps improve and escalate technical questions.
+**What you do**
+- Assign and reassign leads fairly
+- Review reps' qualifications and handovers
+- Manage proposals assigned to your team
+- Monitor overdue tasks and inactive leads
+- Coach reps and unblock them
+- Report team performance to BXB administrators
 
-**Supporting inactive leads:**
-If a lead hasn't been updated, review the activity history. Ask the rep for an update. Reassign only when necessary.`
-  },
-  {
-    id: 'ch-16',
-    level: 3,
-    title: 'Admin & Data Protection',
-    roles: ['admin'],
-    content: `**Administrator Role:**
-Manage User IDs, countries, teams, and global reporting. Always give the correct access level.
+**What you do NOT do**
+- Sell yourself (except in emergencies)
+- Approve your own proposals (only admins can approve)
+- Override admin-only settings
+- See other teams' leads, deals or commercial records
 
-**Data Protection:**
-- Never share passwords.
-- Do not upload client passwords or API keys.
-- Be honest in your records. Never create fake leads or meetings.
-- Do not promise prices or dates without approval.`
+**Daily routine**
+**Morning:**
+1. Open Team Dashboard
+2. Check overnight notifications
+3. Review overdue tasks across your team
+4. Review meetings today
+5. Review qualifications submitted by reps
+
+**Midday:**
+1. Answer questions from reps
+2. Review new handovers
+3. Check for inactive leads (no activity for 14+ days)
+4. Check for unassigned leads
+
+**End of day:**
+1. Review today's activity volume
+2. Read overnight notifications to prepare for tomorrow
+3. Escalate any blocker to BXB admin
+
+The rest of Level 3 goes into each of these in detail.`
   },
   {
     id: 'ch-17',
     level: 3,
     title: 'Troubleshooting & Glossary',
     roles: ['all'],
-    content: `**Common Problems:**
-- **Can't log in:** Check User ID, password, and internet. Contact admin.
-- **Can't see a lead:** It may belong to another team. Ask your leader.
-- **Can't save a form:** Check required fields and internet connection.
+    content: `**Common problems**
 
-**Glossary:**
-- **CRM:** System to organize sales.
-- **Pipeline:** The stages of a sales opportunity.
-- **Handover:** Sending requirements to the tech team.
-- **Deal:** A commercial opportunity.`
+- **Cannot log in:** Check User ID, password and internet. Contact admin
+- **Cannot see a lead:** It may belong to another team. Ask your team lead
+- **Cannot save a form:** Check required fields and internet connection
+- **Repeatedly fails to save:** Do not click Save multiple times. Refresh once and try again
+- **A task disappeared:** You may have created it without a due date. Ask an admin to look
+- **A stage update failed silently:** The app normally shows a toast on failure. If not, reload the page and check the History tab
+
+**Glossary**
+
+- **CRM:** System to organize sales
+- **Lead:** A business that may become a client
+- **Pipeline:** The stages of a sales opportunity
+- **Handover:** Sending requirements to the tech team
+- **Deal:** A commercial opportunity
+- **Proposal:** A formal offer
+- **Qualification:** The review that decides if a lead is worth pursuing
+- **Playbook:** A country-specific sales guide
+- **Audit Log:** A record of who changed what, when
+- **RLS:** The security system that decides which database rows you can read or write`
+  },
+
+  {
+    id: 'ch-29',
+    level: 2,
+    title: 'Dashboard (Deep Dive)',
+    roles: ['all'],
+    content: `The Dashboard is your command center. It answers "What do I need to do today?" without you having to dig.
+
+**The KPI Cards (Top)**
+- **Active leads:** Total leads not in a terminal stage (Won/Lost/etc)
+- **Qualified:** Leads currently in a qualified stage
+- **Meetings (7d):** Your meetings in the next 7 days
+- **Overdue tasks:** Tasks past their due date
+- **Deals won:** Deals marked Won
+- **Pipeline:** Total estimated value of your open deals
+
+**Today's Priorities**
+This section automatically combines:
+- Overdue tasks
+- Tasks due today
+- Meetings scheduled for today
+- Follow-ups due
+
+Tap any priority to jump straight to the relevant lead or task.
+
+**Deal Pipeline Bar**
+Shows how your open deals are distributed across the stages. Hover over the bar to see exact counts.
+
+**Daily Routine**
+1. Look at the priorities list.
+2. Clear the overdue tasks.
+3. Check your meetings for today.
+4. Follow up with the leads listed.
+5. Only then look at the KPIs.`
+  },
+  {
+    id: 'ch-30',
+    level: 2,
+    title: 'Updates Feed',
+    roles: ['all'],
+    content: `The Updates page is where BXB admins post announcements to the team.
+
+**What you will see**
+- **Title and content:** the actual announcement
+- **Tags:** Urgent, Announcement, Meeting, Product, Pricing
+- **Date:** when it was posted
+
+**How to use it**
+1. Open **Updates** from the More menu.
+2. Filter by tag using the chips at the top.
+3. Use the search bar to find specific announcements.
+4. Read the full content.
+
+**Urgent Updates**
+If an update is tagged **Urgent**, it appears with a red badge. Read urgent updates immediately.
+
+**Note**
+Currently, updates are text only. Images and attachments are not supported on this page.`
+  },
+  {
+    id: 'ch-31',
+    level: 2,
+    title: 'Leaderboard',
+    roles: ['all'],
+    content: `The Leaderboard shows the top performing reps across the network.
+
+**The Top 3 Podium**
+The best three reps are shown on a podium at the top, with their avatar, username, and point total.
+
+**The Rest of the List**
+Every other rep is listed below, sorted by points. You can see their country and team.
+
+**Where do points come from?**
+Points are awarded manually by admins for verified work (e.g., qualified leads, won deals). They are not awarded automatically just for logging activities.
+
+**Your rank**
+If you are in the list, your row is highlighted. Your current rank and points are shown.
+
+**Why it matters**
+The leaderboard is a motivational tool. It is not a payroll system. Points do not equal money. Focus on the work, not the score.`
+  },
+  {
+    id: 'ch-32',
+    level: 2,
+    title: 'Profile',
+    roles: ['all'],
+    content: `Your Profile is where you manage your personal information.
+
+**What you can change**
+- **Username:** Your display name (e.g., "John D.")
+- **Avatar:** Your profile picture (upload an image under 5 MB)
+- **Theme:** Toggle between light and dark mode using the button in the header
+
+**What you cannot change**
+- **Role:** Your admin/member status
+- **Team:** Your assigned team
+- **User ID:** Your unique code (e.g., SALES-0004)
+
+**Installing the App**
+If you see the "Get the BXB Teams App" card, tap the button to install BXB on your phone or desktop as a PWA.
+
+**Sign Out**
+Tap the "Sign out" button to log out of the app.`
+  },
+  {
+    id: 'ch-33',
+    level: 2,
+    title: 'Training',
+    roles: ['all'],
+    content: `The Training page is where you complete your BXB onboarding modules.
+
+**How to use it**
+1. Open **Training** from the More menu.
+2. Browse the available modules.
+3. Tap a module to open its detail sheet.
+4. Read the content and watch any linked videos/PDFs.
+5. Tap **Mark complete** when you are done.
+
+**Tracking**
+Your progress is saved in the database. Your completed count and overall progress bar are shown at the top.
+
+**Note**
+There is currently no way to un-complete a module. Be sure you have finished the material before marking it complete.`
+  },
+  {
+    id: 'ch-34',
+    level: 2,
+    title: 'Targets',
+    roles: ['all'],
+    content: `The Targets page shows the sales targets set for you and your team.
+
+**What is a target?**
+A target is a goal set by an admin. Examples:
+- Find 20 new prospects this month
+- Qualify 5 opportunities
+- Hold 3 meetings
+- Win 2 deals
+
+**How to read it**
+- **Progress bar:** shows how close you are to the goal
+- **Numbers:** Actual / Target (e.g., 12 / 20)
+- **Status:** Active, Ended, or Upcoming
+
+**Individual vs Global**
+Targets can be assigned to you individually or set for the whole team. The detail view tells you which scope it is.
+
+**Note**
+Actuals are computed automatically from your database records. You do not update them manually.`
+  },
+  {
+    id: 'ch-35',
+    level: 2,
+    title: 'The Sales Rep Simulation (A Full Week)',
+    roles: ['all'],
+    content: `This chapter is a complete simulation. Follow Sofia, a BXB sales rep, through her first week working a new lead: **Tunisian Delights (a local restaurant group)**. 
+
+Read this to understand how every feature in the app connects together.
+
+---
+
+### MONDAY: Prospecting & First Contact
+Sofia finds a restaurant on Instagram. They have great food but no website and no online booking system. She thinks BXB could help them.
+
+1. **Create the Lead:** Sofia opens the **Leads** page, taps **New Lead**, and searches "Tunisian Delights" to make sure it doesn't exist. It doesn't. She fills in the Business Name (Tunisian Delights), Industry (Restaurant), and City (Tunis). She saves it.
+2. **First Attempt:** She calls the restaurant. The receptionist says the manager is busy. 
+3. **Log the Activity:** Sofia opens the lead, goes to the **Activity** tab, and logs a **Phone Call**. Outcome: "Call Back Requested". Note: "Receptionist said manager is busy. Call back Tuesday morning."
+4. **Create a Task:** She taps **Follow-up** on the Overview tab, which creates a Task: "Call back Tunisian Delights". Due date: Tuesday, 9:00 AM.
+
+---
+
+### TUESDAY: Discovery & Qualification
+1. **Do the Task:** Sofia sees the task in her **Today** tab. She calls the restaurant. She speaks to the General Manager.
+2. **Log the Activity:** She logs a **Phone Call** on the lead. Outcome: "Decision-Maker Identified". Note: "Spoke to GM. They want online booking and a new website. Meeting set for Wednesday."
+3. **Schedule Meeting:** She taps **Schedule** on the lead overview. She creates a Meeting for Wednesday at 2:00 PM (Discovery call).
+
+---
+
+### WEDNESDAY: The Meeting & Qualification
+1. **The Meeting:** Sofia and the GM meet on Zoom. She asks about their current process and what they want to improve. They want to stop using a manual notebook for reservations.
+2. **Complete the Meeting:** Sofia opens the **Meetings** page and marks the meeting as **Completed**.
+3. **Qualify the Lead:** She opens the lead, goes to the **Qualification** tab, and fills out the 5 areas:
+   - *Business Fit:* Real restaurant, wants digital transformation. Good fit.
+   - *Problem:* Manual reservation system, losing bookings.
+   - *Decision Maker:* GM identified.
+   - *Interest:* High, they agreed to a meeting and explained their needs.
+   - *Readiness:* Planning for Q3, budget not yet confirmed.
+4. **Submit:** She taps **Submit for Review**. Her manager gets a notification. 
+
+---
+
+### THURSDAY: The Technical Handover
+The manager approved Sofia's qualification. The lead is now in the **Qualified** stage. Because the problem requires a custom booking system, Sofia needs the tech team's help.
+
+1. **Create Handover:** She opens the lead and taps **Tech Request**.
+2. **Fill the Details:** 
+   - Title: "Custom Booking System & Website"
+   - Client Problem: "Manual notebook system, losing weekend reservations."
+   - Desired Solution: "A web app for customers to book tables, plus a simple admin dashboard for staff."
+   - Timeline: "3 months".
+3. **Submit:** She submits the handover. The Tech Team receives it.
+
+---
+
+### FRIDAY: The Deal & Proposal
+The Tech Team reviews the handover and marks it **Feasible**. Sofia is notified. Now she must move this into a commercial deal.
+
+1. **Update Stage:** She opens the lead and changes the stage from Qualified to **Proposal Preparation**.
+2. **Create the Deal:** She goes to the **Deals** page and taps **New Deal**. 
+   - Title: "Booking System for Tunisian Delights"
+   - Value: 5000
+   - Currency: TND
+   - Stage: Opportunity Created
+3. **Create the Proposal:** She goes to the **Proposals** page and taps **New Proposal**.
+   - She fills in the scope, timeline, and lists the deliverables (Website, Booking App, Staff Dashboard).
+   - She sets the price to 5000 TND and an expiration date of 30 days.
+4. **Request Approval:** She taps **Request Approval**. 
+5. **Wait:** The proposal is now **Pending Approval**. Sofia cannot send it to the client yet. She must wait for an Admin to approve the numbers. 
+
+**End of week.** Sofia has turned a raw Instagram find into a fully qualified, technically assessed, commercial proposal ready for approval.`
+  }
+
+  ,
+  {
+    id: 'ch-36',
+    level: 3,
+    title: 'Team Management & Lead Assignment',
+    roles: ['admin'],
+    content: `As a sales lead, your job is to make sure the team is working efficiently and nobody is stuck.
+
+**The BXB Business Model & Team Building:**
+BXB gives you the production chain (tech team) and the products (BXB Tools store). As a Sales Lead, you act as the middleman. You get a cut of the deals your team closes. To be a Sales Lead, you must recruit and train your own team of Sales Reps.
+
+**The Team Page**
+Open the **Teams** page from the sidebar to see your team.
+- **Members:** See every rep on your team, their role, and their points.
+- **Country & Type:** Verify your team is assigned to the right country.
+- **Workload:** You cannot see their exact tasks here, but you can see their lead count by going to the Leads page.
+
+**Assigning a Lead**
+1. Go to the **Leads** page.
+2. Filter by **Unassigned** to find new leads that need an owner.
+3. Open a lead.
+4. Scroll down to the **Assignment** section.
+5. Select a rep from the dropdown.
+6. Click **Reassign**. The rep is immediately notified.
+
+**Reassigning a Lead (When a Rep is Stuck)**
+Sometimes a rep gets busy or a lead goes cold. To fix this:
+1. Open the lead.
+2. Check the **History** tab to see who owns it now.
+3. Go to the **Assignment** section.
+4. Select a new rep.
+5. Click **Reassign**.
+6. **Best Practice:** Add a task to the new rep or send them a message explaining *why* you reassigned it so they have context.`
+  },
+  {
+    id: 'ch-37',
+    level: 3,
+    title: 'Monitoring Pipeline & Handovers',
+    roles: ['admin'],
+    content: `You do not need to micromanage, but you do need to spot bottlenecks.
+
+**Monitoring the Team Pipeline**
+1. Go to the **Pipeline** page.
+2. Use the **Team** filter (or just view all).
+3. Look for leads stuck in "Contact Attempted" or "Qualification" for too long.
+4. If a rep has 5 leads stuck in the same stage, they might need help.
+
+**Monitoring Technical Handovers**
+1. Go to the **Handovers** page.
+2. Filter by **Pending** or **Under Assessment**.
+3. Look for handovers that have been sitting for days.
+4. If the tech team is slow, escalate it to the Admin.
+5. If the rep submitted a bad handover (missing info), update the status to **More Information Required** and add a comment.`
+  },
+  {
+    id: 'ch-38',
+    level: 3,
+    title: 'Approvals, Reports & Targets',
+    roles: ['admin'],
+    content: `**Approving Qualifications**
+When a rep submits a qualification, it lands in your queue.
+1. Open the lead.
+2. Go to the **Qualification** tab.
+3. Review the 5 areas.
+4. If it is good, click **Approve**.
+5. If it is missing info, click **Return** and leave a comment. The rep will be notified.
+
+**Approving Proposals**
+*(Note: In this app version, final proposal approval is reserved for the Global Admin. As a sales lead, you review the numbers and ensure the rep didn't promise anything unapproved. If everything looks good, notify the Admin to approve it in the system.)*
+
+**Reading Team Reports**
+1. Go to **Reports**.
+2. Change the range to **This Month**.
+3. Look at **Conversion Rate**. If it is low, your team is creating leads but not closing them.
+4. Look at the **Pipeline Funnel** to see where leads die.
+
+**Monitoring Targets**
+1. Go to **Targets**.
+2. See how your team is tracking against the monthly goal.
+3. If you are behind halfway through the month, organize a team call to push.`
+  },
+  {
+    id: 'ch-39',
+    level: 3,
+    title: 'The Sales Lead Simulation (A Full Week)',
+    roles: ['admin'],
+    content: `Follow Karim, a Sales Lead in Tunisia, through a typical week managing his team.
+
+---
+
+### MONDAY: The Morning Review
+Karim logs in at 8:30 AM.
+1. He opens the **Dashboard** to check global activity.
+2. He goes to **Teams** to see his 5 reps are active.
+3. He opens **Leads**, filters by **Team**, and spots that Rep A has 15 leads, while Rep B has 2. He makes a mental note to balance the load.
+
+### TUESDAY: Reviewing a Qualification
+Rep A gets a notification that her qualification for "Alpha Corp" is returned.
+1. Karim opens the lead, clicks the **Qualification** tab.
+2. He sees the rep left "Decision-Maker" blank.
+3. He clicks **Return** and writes: "Please find out who the GM is before we submit this to tech."
+4. The rep is notified and gets to work.
+
+### WEDNESDAY: Reassigning a Stuck Lead
+Karim notices a lead "Beta Ltd" has been in "Contact Attempted" for 3 weeks.
+1. He opens the lead and checks the **History** tab. He sees Rep B called once and left no next steps.
+2. He goes to the **Assignment** section and reassigns it to Rep C.
+3. He then goes to the **Tasks** page and creates a task for Rep C: "Call Beta Ltd and qualify them."
+
+### THURSDAY: Monitoring Handovers
+Rep D submitted a handover for "Gamma Tech" on Monday.
+1. Karim goes to the **Handovers** page.
+2. He sees it is still "Awaiting Review".
+3. He pings the Global Admin via the internal messaging system (or Slack/WhatsApp) to get it assessed.
+4. The next day it is marked **Feasible**.
+
+### FRIDAY: Weekly Review
+Karim goes to **Reports**.
+1. He sets the range to **This Week**.
+2. He sees the team made 40 calls, held 5 meetings, and created 3 deals.
+3. He checks the **Leaderboard** to see which reps are leading.
+4. He realizes the team is behind on the monthly target, so he schedules a team meeting for Monday morning to discuss the final push.`
   }
 ];

@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
+import { localToday } from '../lib/date';
+import { LEAD_STAGES, QUALIFIED_STAGES, INACTIVE_STAGES, stageBadgeClass } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { FileText, Loader2, Plus, Search, Building2, Target, ChevronRight, Clock, Phone, Mail, Globe, MapPin, Calendar, CheckSquare, Wrench, Briefcase } from 'lucide-react';
@@ -40,59 +42,6 @@ type HistoryItem = {
 
 type Tab = 'overview' | 'activity' | 'qualification' | 'history';
 type Filter = 'all' | 'mine' | 'overdue' | 'qualified' | 'unassigned';
-
-const STAGES = [
-  'New Lead', 'Researching', 'Ready to Contact', 'Contact Attempted',
-  'Contacted', 'Response Received', 'Qualified', 'Meeting Proposed',
-  'Meeting Scheduled', 'Discovery Completed', 'Technical Review',
-  'Proposal Preparation', 'Proposal Sent', 'Negotiation', 'Won', 'Lost', 'Nurture', 'Disqualified', 'Duplicate'
-];
-
-const QUALIFIED_STAGES = ['Qualified', 'Meeting Proposed', 'Meeting Scheduled', 'Discovery Completed', 'Technical Review', 'Proposal Preparation', 'Proposal Sent', 'Negotiation', 'Won'];
-const INACTIVE_STAGES = ['Won', 'Lost', 'Disqualified', 'Duplicate', 'Nurture'];
-
-function stageBadgeClass(stage: string) {
-  if (stage === 'Won') return 'badge-success';
-  if (stage === 'Lost' || stage === 'Disqualified' || stage === 'Duplicate') return 'badge-danger';
-  if (stage === 'Nurture') return 'badge-neutral';
-  if (QUALIFIED_STAGES.includes(stage)) return 'badge-brand';
-  return 'badge-info';
-}
-
-export default function Leads() {
-  const { profile } = useAuth();
-  const toast = useToast();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showSheet, setShowSheet] = useState(false);
-  const [bizName, setBizName] = useState('');
-  const [bizIndustry, setBizIndustry] = useState('');
-  const [bizCity, setBizCity] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
-  const [nameError, setNameError] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<Filter>(() => {
-    if (typeof window === 'undefined') return 'all';
-    const v = localStorage.getItem('bxb-leads-filter');
-    if (v === 'mine' || v === 'overdue' || v === 'qualified' || v === 'unassigned') return v;
-    return 'all';
-  });
-
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-  const [isUpdatingStage, setIsUpdatingStage] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
-
-  useEffect(() => { fetchLeads(); }, []);
-
-  useEffect(() => {
-    const st = (location.state as any) || {};
-    if (typeof st.search === 'string') setSearchQuery(st.search);
-    if (st.openCreate) setShowSheet(true);
-  }, [location.state]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -176,7 +125,7 @@ export default function Leads() {
     fetchHistory(lead.id);
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = localToday();
 
   const filteredLeads = leads.filter(l => {
     const matchesSearch =
@@ -386,7 +335,7 @@ export default function Leads() {
                 <div>
                   <p className="eyebrow mb-2">Current stage</p>
                   <select value={selectedLead.stage} onChange={e => handleUpdateStage(e.target.value)} disabled={isUpdatingStage} className="input-field w-full">
-                    {STAGES.map(s => (
+                    {LEAD_STAGES.map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>

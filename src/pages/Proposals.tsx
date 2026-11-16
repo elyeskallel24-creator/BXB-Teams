@@ -112,7 +112,7 @@ export default function Proposals() {
     setSaving(false);
   }
 
-  async function requestApproval(p: Proposal) {
+      async function requestApproval(p: Proposal) {
     if (!profile) return;
     setUpdatingAction('request:' + p.id);
     const { error: approvalError } = await supabase.from('proposal_approvals').insert({
@@ -140,20 +140,9 @@ export default function Proposals() {
     if (!profile) return;
     const key = (decision === 'Approved' ? 'approve:' : 'reject:') + p.id;
     setUpdatingAction(key);
-    const { error: approvalError } = await supabase.from('proposal_approvals')
-      .update({ decision, reviewed_by: profile.id, reviewed_at: new Date().toISOString() })
-      .eq('proposal_id', p.id)
-      .eq('decision', 'Pending');
-    if (approvalError) {
-      toast.error('Could not update approval record');
-      setUpdatingAction(null);
-      return;
-    }
-    const { error } = await supabase.from('proposals').update({
-      approval_status: decision,
-      approved_by: profile.id,
-      approved_at: new Date().toISOString(),
-    }).eq('id', p.id);
+    
+    const { error } = await supabase.rpc('decide_proposal_approval', { p_proposal_id: p.id, p_decision: decision });
+    
     if (!error) {
       toast.success(decision === 'Approved' ? 'Proposal approved' : 'Proposal rejected');
       await fetchProposals();

@@ -1,5 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { localToday } from '../lib/date';
+import { LEAD_STAGES, OPEN_DEAL_STAGES } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Users, Building2, Globe, TrendingUp, DollarSign, ArrowRight, Activity, AlertTriangle } from 'lucide-react';
@@ -7,8 +9,8 @@ import { SkeletonBox } from '../components/Skeleton';
 
 type Kpi = { label: string; value: number | string; tone: 'neutral' | 'info' | 'success' | 'brand'; icon: any; mono?: boolean };
 
-const FUNNEL = ['New Lead','Researching','Ready to Contact','Contact Attempted','Contacted','Response Received','Qualified','Meeting Proposed','Meeting Scheduled','Discovery Completed','Technical Review','Proposal Preparation','Proposal Sent','Negotiation','Won'];
-const OPEN_DEAL = ['Opportunity Created','Technical Assessment','Pricing Review','Proposal Draft','Internal Approval','Proposal Approved','Proposal Sent','Negotiation'];
+
+
 
 function compact(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -21,7 +23,7 @@ export default function GlobalCommandCenter() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [kpis, setKpis] = useState<Kpi[]>([]);
-  const [funnel, setFunnel] = useState<{ stage: string; count: number }[]>([]);
+  const [LEAD_STAGES, setLEAD_STAGES] = useState<{ stage: string; count: number }[]>([]);
   const [teams, setTeams] = useState<{ id: string; name: string; members: number; leads: number; won: number; revenue: number; currency: string }[]>([]);
   const [attention, setAttention] = useState<{ label: string; count: number; go: () => void }[]>([]);
 
@@ -53,9 +55,9 @@ export default function GlobalCommandCenter() {
 
     const activeReps = profiles.filter(p => p.role === 'member').length;
     const wonDeals = deals.filter(d => d.stage === 'Won');
-    const openDeals = deals.filter(d => OPEN_DEAL.includes(d.stage));
+    const openDeals = deals.filter(d => OPEN_DEAL_STAGES.includes(d.stage));
     const pendingHandovers = handovers.filter(h => ['Submitted','Awaiting Review','Under Technical Assessment'].includes(h.status)).length;
-    const overdueTasks = tasks.filter(t => t.status !== 'Completed' && t.status !== 'Cancelled' && t.due_date && t.due_date < new Date().toISOString().split('T')[0]).length;
+    const overdueTasks = tasks.filter(t => t.status !== 'Completed' && t.status !== 'Cancelled' && t.due_date && t.due_date < localToday()).length;
 
     const revByCur: Record<string, number> = {};
     wonDeals.forEach(d => {
@@ -73,7 +75,7 @@ export default function GlobalCommandCenter() {
       { label: 'Revenue', value: domCur ? compact(domCur[1]) + ' ' + domCur[0] : '—', tone: 'success', icon: DollarSign, mono: true },
     ]);
 
-    setFunnel(FUNNEL.map(stage => ({ stage, count: leads.filter(l => l.stage === stage).length })));
+    setLEAD_STAGES(LEAD_STAGES.map(stage => ({ stage, count: leads.filter(l => l.stage === stage).length })));
 
     const teamStats = teamsList.map(t => {
       const mem = profiles.filter(p => p.team_id === t.id).length;
@@ -125,7 +127,7 @@ export default function GlobalCommandCenter() {
     );
   }
 
-  const maxFunnel = Math.max(1, ...funnel.map(f => f.count));
+  const maxLEAD_STAGES = Math.max(1, ...LEAD_STAGES.map(f => f.count));
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto animate-enter">
@@ -173,10 +175,10 @@ export default function GlobalCommandCenter() {
       </div>
 
       <div className="mb-5">
-        <h2 className="text-[15px] font-bold tracking-tight mb-2.5">Global funnel</h2>
+        <h2 className="text-[15px] font-bold tracking-tight mb-2.5">Global LEAD_STAGES</h2>
         <div className="card !p-3 space-y-2">
-          {funnel.filter(f => f.count > 0).map(f => {
-            const pct = Math.max(2, Math.round((f.count / maxFunnel) * 100));
+          {LEAD_STAGES.filter(f => f.count > 0).map(f => {
+            const pct = Math.max(2, Math.round((f.count / maxLEAD_STAGES) * 100));
             return (
               <div key={f.stage}>
                 <div className="flex items-center justify-between text-[11px] mb-0.5">
@@ -189,7 +191,7 @@ export default function GlobalCommandCenter() {
               </div>
             );
           })}
-          {funnel.every(f => f.count === 0) && (
+          {LEAD_STAGES.every(f => f.count === 0) && (
             <p className="text-[12px] text-text-mutedLight dark:text-text-mutedDark text-center py-4">No leads yet across the network.</p>
           )}
         </div>

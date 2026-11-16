@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Target, Calendar, ListTodo, Wrench } from 'lucide-react';
 import { BottomSheet } from './BottomSheet';
@@ -13,7 +13,7 @@ const ACTIONS: Action[] = [
   { label: 'Add Lead', icon: Target, path: '/leads' },
   { label: 'Schedule Meeting', icon: Calendar, path: '/meetings' },
   { label: 'Create Task', icon: ListTodo, path: '/tasks' },
-  { label: 'Technical Request', icon: Wrench, path: '/handovers' },
+  { label: 'Technical Request', icon: Wrench, path: '/technical-handovers' },
 ];
 
 export function QuickAction() {

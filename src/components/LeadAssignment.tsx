@@ -67,15 +67,7 @@ export function LeadAssignment({
       changed_by: profile.id
     });
     if (assignErr) console.error('Failed to log assignment history:', assignErr);
-    const { error: auditErr } = await supabase.from('audit_logs').insert({
-      actor_id: profile.id,
-      action: 'Lead reassigned',
-      entity_type: 'lead',
-      entity_id: leadId,
-      old_value: { assigned_to: previous },
-      new_value: { assigned_to: selected }
-    });
-    if (auditErr) console.error('Failed to log audit trail:', auditErr);
+    // Audit log is now handled automatically by the DB trigger
     setMsg('Reassigned successfully.');
     if (onChanged) onChanged();
     setSaving(false);

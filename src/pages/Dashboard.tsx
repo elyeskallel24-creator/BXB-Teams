@@ -1,5 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { localToday, localDatePlusDays } from '../lib/date';
+import { INACTIVE_STAGES, QUALIFIED_STAGES, OPEN_DEAL_STAGES } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -13,9 +15,9 @@ type Task = { id: string; title: string; status: string; priority: string; due_d
 type Meeting = { id: string; title: string; meeting_date: string; start_time: string; status: string };
 type Deal = { id: string; stage: string; estimated_value: number | null; currency: string | null };
 
-const TERMINAL = ['Won', 'Lost', 'Disqualified', 'Duplicate', 'Nurture'];
-const QUALIFIED = ['Qualified', 'Meeting Proposed', 'Meeting Scheduled', 'Discovery Completed', 'Technical Review', 'Proposal Preparation', 'Proposal Sent', 'Negotiation', 'Won'];
-const OPEN_DEAL = ['Opportunity Created', 'Technical Assessment', 'Pricing Review', 'Proposal Draft', 'Internal Approval', 'Proposal Approved', 'Proposal Sent', 'Negotiation'];
+
+
+
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -61,7 +63,7 @@ export default function Dashboard() {
 
   async function fetchAll() {
     setLoading(true);
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = localToday();
     const [l, t, m, d] = await Promise.all([
       supabase.from('leads').select('id, stage, next_follow_up, priority, businesses(name, industry, city)').eq('assigned_to', profile!.id),
       supabase.from('tasks').select('id, title, status, priority, due_date').eq('assigned_to', profile!.id).not('status', 'in', '("Completed","Cancelled")'),
@@ -75,18 +77,18 @@ export default function Dashboard() {
     setLoading(false);
   }
 
-  const today = new Date().toISOString().split('T')[0];
-  const todayEnd = new Date(); todayEnd.setDate(todayEnd.getDate() + 7);
-  const weekAheadStr = todayEnd.toISOString().split('T')[0];
+  const today = localToday();
+  
+  const weekAheadStr = localDatePlusDays(7);
 
-  const activeLeads = leads.filter(l => !TERMINAL.includes(l.stage)).length;
-  const qualifiedLeads = leads.filter(l => QUALIFIED.includes(l.stage)).length;
+  const activeLeads = leads.filter(l => !INACTIVE_STAGES.includes(l.stage)).length;
+  const qualifiedLeads = leads.filter(l => QUALIFIED_STAGES.includes(l.stage)).length;
   const weekMeetings = meetings.filter(m => m.meeting_date <= weekAheadStr && ['Confirmed', 'Awaiting Confirmation', 'Proposed'].includes(m.status)).length;
   const overdueTasks = tasks.filter(t => t.due_date && t.due_date < today).length;
   const wonDeals = deals.filter(d => d.stage === 'Won').length;
 
   const openDealsByCurrency: Record<string, number> = {};
-  deals.filter(d => OPEN_DEAL.includes(d.stage) && d.estimated_value).forEach(d => {
+  deals.filter(d => OPEN_DEAL_STAGES.includes(d.stage) && d.estimated_value).forEach(d => {
     const c = d.currency || 'USD';
     openDealsByCurrency[c] = (openDealsByCurrency[c] || 0) + (d.estimated_value || 0);
   });
@@ -119,7 +121,7 @@ export default function Dashboard() {
       go: () => navigate('/meetings'),
     });
   });
-  leads.filter(l => l.next_follow_up && l.next_follow_up <= today && !TERMINAL.includes(l.stage)).slice(0, 3).forEach(l => {
+  leads.filter(l => l.next_follow_up && l.next_follow_up <= today && !INACTIVE_STAGES.includes(l.stage)).slice(0, 3).forEach(l => {
     priorities.push({
       id: 'l-' + l.id, kind: 'followup', icon: Phone, tone: 'text-state-warning bg-state-warningSoft',
       title: l.businesses?.name || 'Lead',
@@ -240,12 +242,12 @@ export default function Dashboard() {
           <div className="card !p-3">
             <div className="flex items-center justify-between mb-2 text-[11px]">
               <span className="text-text-mutedLight dark:text-text-mutedDark">Open stages</span>
-              <span className="font-mono tabular-nums font-semibold">{deals.filter(d => OPEN_DEAL.includes(d.stage)).length} open</span>
+              <span className="font-mono tabular-nums font-semibold">{deals.filter(d => OPEN_DEAL_STAGES.includes(d.stage)).length} open</span>
             </div>
             <div className="h-2 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden flex">
               {['Opportunity Created','Technical Assessment','Pricing Review','Proposal Draft','Internal Approval','Proposal Approved','Proposal Sent','Negotiation'].map((stage, i) => {
                 const count = deals.filter(d => d.stage === stage).length;
-                const total = deals.filter(d => OPEN_DEAL.includes(d.stage)).length;
+                const total = deals.filter(d => OPEN_DEAL_STAGES.includes(d.stage)).length;
                 if (count === 0) return null;
                 const pct = (count / total) * 100;
                 const opacity = 0.25 + (i / 7) * 0.75;

@@ -11,6 +11,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './components/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { supabase } from './supabase';
+import { CommandPalette } from './components/CommandPalette';
+import { QuickAction } from './components/QuickAction';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Leads = lazy(() => import('./pages/Leads'));
@@ -334,6 +336,8 @@ function Shell() {
           </div>
         )}
       </div>
+      <CommandPalette />
+      <QuickAction />
     </div>
   );
 }

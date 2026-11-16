@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
-import { Loader2, Sun, Moon, ArrowRight } from 'lucide-react';
+import { Loader2, Sun, Moon, ArrowRight, Camera, X } from 'lucide-react';
 import { useToast } from '../components/Toast';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { PWAInstallButton } from '../components/PWAInstallButton';
@@ -193,11 +193,44 @@ export default function Login() {
                 </div>
                 <div>
                   <label className="eyebrow block mb-1.5">Profile photo (optional)</label>
+                  <label
+                    htmlFor="avatar-upload"
+                    className="flex items-center justify-between w-full h-[46px] px-4 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] hover:border-[#FF6B2C]/50 cursor-pointer transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 truncate">
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${avatar ? 'bg-[#FF6B2C]/20 text-[#FF6B2C]' : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] group-hover:text-[#FF6B2C]'}`}>
+                        <Camera size={14} />
+                      </div>
+                      <span className={`text-[13px] truncate ${avatar ? 'text-white font-medium' : 'text-[var(--text-secondary)]'}`}>
+                        {avatar ? avatar.name : 'Choose a profile photo...'}
+                      </span>
+                    </div>
+                    {avatar ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setAvatar(null);
+                          const fileInput = document.getElementById('avatar-upload') as HTMLInputElement;
+                          if (fileInput) fileInput.value = '';
+                        }}
+                        className="text-[12px] font-semibold text-red-400 hover:text-red-300 shrink-0 ml-2 flex items-center gap-1 transition-colors bg-red-400/10 px-2 py-1 rounded-md"
+                      >
+                        <X size={12} strokeWidth={3} />
+                        Remove
+                      </button>
+                    ) : (
+                      <span className="text-[12px] font-semibold text-[#FF6B2C] shrink-0 ml-2 group-hover:text-[#FF6B2C]/80 transition-colors bg-[#FF6B2C]/10 px-3 py-1.5 rounded-md">
+                        Browse
+                      </span>
+                    )}
+                  </label>
                   <input
+                    id="avatar-upload"
                     type="file"
                     accept="image/*"
                     onChange={e => setAvatar(e.target.files?.[0] || null)}
-                    className="input-field !bg-[var(--bg-base)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--brand-soft)] file:text-[var(--brand)] file:font-semibold file:px-3 file:py-1.5 file:text-[12px]"
+                    className="hidden"
                   />
                 </div>
               </>

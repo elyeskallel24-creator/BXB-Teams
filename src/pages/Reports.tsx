@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, type ReactNode } from 'react';
+import { LEAD_STAGES, QUALIFIED_STAGES, DEAL_STAGES } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Download, TrendingUp, Users, DollarSign, Calendar, Target, BarChart3 } from 'lucide-react';
@@ -36,22 +37,11 @@ const RANGES = [
 ] as const;
 type RangeKey = typeof RANGES[number]['key'];
 
-const FUNNEL_STAGES = [
-  'New Lead', 'Researching', 'Ready to Contact', 'Contact Attempted',
-  'Contacted', 'Response Received', 'Qualified', 'Meeting Proposed',
-  'Meeting Scheduled', 'Discovery Completed', 'Technical Review',
-  'Proposal Preparation', 'Proposal Sent', 'Negotiation', 'Won',
-];
 
-const QUALIFIED_AND_BEYOND = [
-  'Qualified', 'Meeting Proposed', 'Meeting Scheduled', 'Discovery Completed',
-  'Technical Review', 'Proposal Preparation', 'Proposal Sent', 'Negotiation', 'Won',
-];
 
-const DEAL_STAGES = [
-  'Opportunity Created', 'Technical Assessment', 'Pricing Review', 'Proposal Draft',
-  'Internal Approval', 'Proposal Approved', 'Proposal Sent', 'Negotiation', 'Won', 'Lost',
-];
+
+
+
 
 function rangeStart(key: RangeKey): Date {
   const d = new Date();
@@ -168,7 +158,7 @@ export default function Reports() {
   const filteredMeetings = meetings.filter(m => m.meeting_date >= startDateStr && m.status === 'Completed');
 
   const totalLeads = filteredLeads.length;
-  const qualifiedLeads = filteredLeads.filter(l => QUALIFIED_AND_BEYOND.includes(l.stage)).length;
+  const qualifiedLeads = filteredLeads.filter(l => QUALIFIED_STAGES.includes(l.stage)).length;
   const meetingsHeld = filteredMeetings.length;
   const wonDeals = filteredDeals.filter(d => d.stage === 'Won');
   const wonCount = wonDeals.length;
@@ -184,7 +174,7 @@ export default function Reports() {
   const dominantValue = sortedCur[0]?.[1] || 0;
   const otherCurrencies = Math.max(0, sortedCur.length - 1);
 
-  const funnelData = FUNNEL_STAGES.map(stage => ({
+  const funnelData = LEAD_STAGES.map(stage => ({
     stage,
     count: filteredLeads.filter(l => l.stage === stage).length,
   }));

@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { localToday } from '../lib/date';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Plus, Calendar, Clock, MapPin, Video, CheckCircle2, X } from 'lucide-react';
@@ -131,7 +132,7 @@ export default function Meetings() {
     setUpdatingId(null);
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = localToday();
   const filtered = meetings.filter(m => tab === 'upcoming' ? m.meeting_date >= today : m.meeting_date < today);
   const upcomingCount = meetings.filter(m => m.meeting_date >= today).length;
   const pastCount = meetings.filter(m => m.meeting_date < today).length;

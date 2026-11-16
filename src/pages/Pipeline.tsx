@@ -1,4 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react';
+import { localToday } from '../lib/date';
+import { LEAD_STAGES, INACTIVE_STAGES, QUALIFIED_STAGES, stageBadgeClass } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Search, Layers, Building2 } from 'lucide-react';
@@ -16,148 +18,14 @@ type Lead = {
   businesses: { name: string; industry: string | null; city: string | null } | null;
 };
 
-const STAGES = [
-  'New Lead', 'Researching', 'Ready to Contact', 'Contact Attempted',
-  'Contacted', 'Response Received', 'Qualified', 'Meeting Proposed',
-  'Meeting Scheduled', 'Discovery Completed', 'Technical Review',
-  'Proposal Preparation', 'Proposal Sent', 'Negotiation', 'Won', 'Lost', 'Nurture', 'Disqualified', 'Duplicate',
-];
-
-const TERMINAL = ['Won', 'Lost', 'Disqualified', 'Duplicate', 'Nurture'];
-const BRAND_STAGES = ['Qualified', 'Meeting Proposed', 'Meeting Scheduled', 'Discovery Completed', 'Technical Review', 'Proposal Preparation', 'Proposal Sent', 'Negotiation'];
-
-function stageBadgeClass(stage: string) {
-  if (stage === 'Won') return 'badge-success';
-  if (['Lost', 'Disqualified', 'Duplicate'].includes(stage)) return 'badge-danger';
-  if (stage === 'Nurture') return 'badge-neutral';
-  if (BRAND_STAGES.includes(stage)) return 'badge-brand';
-  return 'badge-info';
-}
-
-function StageColumn({ stage, leads, onOpen }: { stage: string; leads: Lead[]; onOpen: (lead: Lead) => void }) {
-  const today = new Date().toISOString().split('T')[0];
-  return (
-    <div className="shrink-0 w-full md:w-[300px]">
-      <div className="flex items-center justify-between mb-2 px-1">
-        <span className={stageBadgeClass(stage)}>{stage}</span>
-        <span className="text-[11px] font-semibold font-mono tabular-nums text-text-mutedLight dark:text-text-mutedDark">
-          {leads.length}
-        </span>
-      </div>
-      {leads.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-surface-borderLight dark:border-surface-borderDark px-4 py-8 text-center">
-          <p className="text-[12px] text-text-mutedLight dark:text-text-mutedDark">No leads</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {leads.map(lead => (
-            <button
-              key={lead.id}
-              onClick={() => onOpen(lead)}
-              className="card p-3 w-full text-left hover:border-brand-primary/30 active:scale-[0.995] transition-all"
-            >
-              <div className="flex items-start gap-2.5 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">
-                  <Building2 size={15} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold tracking-tight truncate">{lead.businesses?.name || 'Unnamed'}</p>
-                  <p className="text-[11px] text-text-secondaryLight dark:text-text-secondaryDark truncate">
-                    {[lead.businesses?.industry, lead.businesses?.city].filter(Boolean).join(' · ') || 'No details'}
-                  </p>
-                </div>
-              </div>
-              {((lead.priority && lead.priority !== 'Medium') || lead.next_follow_up) && (
-                <div className="flex flex-wrap gap-1.5">
-                  {lead.priority && lead.priority !== 'Medium' && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/5 text-text-secondaryLight dark:text-text-secondaryDark">
-                      {lead.priority}
-                    </span>
-                  )}
-                  {lead.next_follow_up && (
-                    <span className={'text-[10px] font-semibold px-1.5 py-0.5 rounded-md ' + (lead.next_follow_up < today ? 'bg-state-dangerSoft text-state-danger' : 'bg-black/5 dark:bg-white/5 text-text-secondaryLight dark:text-text-secondaryDark')}>
-                      {new Date(lead.next_follow_up).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    </span>
-                  )}
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-type Filter = 'active' | 'all' | 'mine' | 'overdue' | 'unassigned';
-
-export default function Pipeline() {
-  const { profile } = useAuth();
-  const toast = useToast();
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<Filter>('active');
-  const [activeStage, setActiveStage] = useState<string>('New Lead');
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const mobileBoardRef = useRef<HTMLDivElement>(null);
-  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => { fetchLeads(); }, []);
 
-  async function fetchLeads() {
-    const { data, error } = await supabase
-      .from('leads')
-      .select('id, business_id, stage, priority, next_follow_up, assigned_to, businesses(name, industry, city)')
-      .order('created_at', { ascending: false });
-    if (!error && data) setLeads(data as any);
-    setLoading(false);
-  }
-
-  async function handleUpdateStage(newStage: string) {
-    if (!selectedLead) return;
-    setIsUpdating(true);
-    const { data, error } = await supabase.from('leads').update({ stage: newStage }).eq('id', selectedLead.id).select();
-    if (error) {
-      console.error('Update stage error:', error);
-      toast.error('Error: ' + (error.message || error.details || 'Unknown error'));
-    } else if (!data || data.length === 0) {
-      toast.error('Update failed: Lead not found or permission denied.');
-    } else {
-      toast.success('Stage updated');
-      setSelectedLead({ ...selectedLead, stage: newStage });
-      fetchLeads();
-    }
-    setIsUpdating(false);
-  }
-
-  const today = new Date().toISOString().split('T')[0];
-
-  const filtered = leads.filter(l => {
-    const matchesSearch =
-      !searchQuery ||
-      (l.businesses?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (l.businesses?.industry || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (l.businesses?.city || '').toLowerCase().includes(searchQuery.toLowerCase());
-    if (!matchesSearch) return false;
-
-    switch (filter) {
-      case 'active': return !TERMINAL.includes(l.stage);
-      case 'mine': return l.assigned_to === profile?.id;
-      case 'overdue': return !!l.next_follow_up && l.next_follow_up < today && !TERMINAL.includes(l.stage);
-      case 'unassigned': return !l.assigned_to;
-      default: return true;
-    }
-  });
-
-  const visibleStages = filter === 'active'
-    ? STAGES.filter(s => !TERMINAL.includes(s))
-    : STAGES;
+  const visibleLEAD_STAGES = filter === 'active'
+    ? LEAD_STAGES.filter(s => !INACTIVE_STAGES.includes(s))
+    : LEAD_STAGES;
 
   const grouped: Record<string, Lead[]> = {};
-  visibleStages.forEach(s => { grouped[s] = []; });
+  visibleLEAD_STAGES.forEach(s => { grouped[s] = []; });
   filtered.forEach(l => {
     if (grouped[l.stage]) grouped[l.stage].push(l);
   });
@@ -165,15 +33,15 @@ export default function Pipeline() {
   // Auto-select first non-empty stage on initial load
   useEffect(() => {
     if (loading) return;
-    const firstNonEmpty = visibleStages.find(s => (grouped[s]?.length || 0) > 0);
+    const firstNonEmpty = visibleLEAD_STAGES.find(s => (grouped[s]?.length || 0) > 0);
     if (firstNonEmpty) setActiveStage(firstNonEmpty);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
-  // Reset active stage when it disappears from visible stages (filter change)
+  // Reset active stage when it disappears from visible LEAD_STAGES (filter change)
   useEffect(() => {
-    if (!visibleStages.includes(activeStage)) {
-      setActiveStage(visibleStages[0] || 'New Lead');
+    if (!visibleLEAD_STAGES.includes(activeStage)) {
+      setActiveStage(visibleLEAD_STAGES[0] || 'New Lead');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
@@ -241,7 +109,7 @@ export default function Pipeline() {
         <div className="min-w-0">
           <h1 className="page-title">Pipeline</h1>
           <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark">
-            {leads.filter(l => !TERMINAL.includes(l.stage)).length} active · {leads.length} total
+            {leads.filter(l => !INACTIVE_STAGES.includes(l.stage)).length} active · {leads.length} total
           </p>
         </div>
       </div>
@@ -283,7 +151,7 @@ export default function Pipeline() {
             {searchQuery
               ? 'Try a different search term.'
               : filter !== 'all'
-                ? 'Switch to "All" to see more stages.'
+                ? 'Switch to "All" to see more LEAD_STAGES.'
                 : 'Create your first lead from the Leads page.'}
           </p>
         </div>
@@ -291,7 +159,7 @@ export default function Pipeline() {
         <>
           {/* Desktop kanban */}
           <div className="hidden md:flex gap-3 overflow-x-auto pb-4">
-            {visibleStages.map(stage => (
+            {visibleLEAD_STAGES.map(stage => (
               <StageColumn key={stage} stage={stage} leads={grouped[stage] || []} onOpen={(l) => setSelectedLead(l)} />
             ))}
           </div>
@@ -299,7 +167,7 @@ export default function Pipeline() {
           {/* Mobile: stage picker + snap board */}
           <div className="md:hidden">
             <div className="flex gap-1.5 overflow-x-auto -mx-6 px-6 pb-1 mb-3 scrollbar-hide">
-              {visibleStages.map(stage => (
+              {visibleLEAD_STAGES.map(stage => (
                 <button
                   key={stage}
                   onClick={() => jumpToStage(stage)}
@@ -317,7 +185,7 @@ export default function Pipeline() {
               onScroll={handleMobileScroll}
               className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 -mx-6 px-6"
             >
-              {visibleStages.map(stage => (
+              {visibleLEAD_STAGES.map(stage => (
                 <div key={stage} data-stage={stage} className="snap-center shrink-0 w-[85vw] max-w-[340px]">
                   <StageColumn stage={stage} leads={grouped[stage] || []} onOpen={(l) => setSelectedLead(l)} />
                 </div>
@@ -345,7 +213,7 @@ export default function Pipeline() {
                 disabled={isUpdating}
                 className="input-field w-full"
               >
-                {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+                {LEAD_STAGES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
 

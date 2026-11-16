@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { localToday } from '../lib/date';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Plus, Check, CheckCircle2, Clock, AlertTriangle, ListTodo } from 'lucide-react';
@@ -118,7 +119,7 @@ export default function Tasks() {
     }
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = localToday();
 
   const filtered = tasks.filter(t => {
     if (activeTab === 'completed') return t.status === 'Completed';

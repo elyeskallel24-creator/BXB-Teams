@@ -1,4 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
+import { localToday } from '../lib/date';
+import { QUALIFIED_STAGES } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Plus, Target as TargetIcon, Calendar } from 'lucide-react';
@@ -31,7 +33,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 function statusOf(t: Target) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = localToday();
   if (!t.is_active) return 'Archived';
   if (t.period_end < today) return 'Ended';
   if (t.period_start > today) return 'Upcoming';
@@ -87,7 +89,7 @@ export default function Targets() {
     const leads = (leadsRes.data || []) as any[];
     const meetings = (meetingsRes.data || []) as any[];
     const deals = (dealsRes.data || []) as any[];
-    const QUALIFIED = ['Qualified','Meeting Proposed','Meeting Scheduled','Discovery Completed','Technical Review','Proposal Preparation','Proposal Sent','Negotiation','Won'];
+    
 
     const result: Record<string, number> = {};
     tList.forEach(t => {
@@ -101,7 +103,7 @@ export default function Targets() {
       if (t.target_type === 'prospects') {
         count = leads.filter(l => matchesScope(l) && inRange(l.created_at.split('T')[0])).length;
       } else if (t.target_type === 'qualified') {
-        count = leads.filter(l => matchesScope(l) && inRange(l.created_at.split('T')[0]) && QUALIFIED.includes(l.stage)).length;
+        count = leads.filter(l => matchesScope(l) && inRange(l.created_at.split('T')[0]) && QUALIFIED_STAGES.includes(l.stage)).length;
       } else if (t.target_type === 'meetings') {
         count = meetings.filter(m => matchesScope(m) && inRange(m.meeting_date) && m.status === 'Completed').length;
       } else if (t.target_type === 'won') {

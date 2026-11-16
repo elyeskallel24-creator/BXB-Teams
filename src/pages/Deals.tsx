@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
+import { DEAL_STAGES, OPEN_DEAL_STAGES, stageBadgeClass } from '../lib/stages';
 import { supabase } from '../supabase';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Plus, DollarSign, ChevronRight, Calendar } from 'lucide-react';
@@ -17,21 +18,10 @@ type Deal = {
   notes: string | null;
 };
 
-const DEAL_STAGES = [
-  'Opportunity Created',
-  'Technical Assessment',
-  'Pricing Review',
-  'Proposal Draft',
-  'Internal Approval',
-  'Proposal Approved',
-  'Proposal Sent',
-  'Negotiation',
-  'Won',
-  'Lost',
-];
 
-const OPEN_STAGES = ['Opportunity Created', 'Technical Assessment', 'Pricing Review', 'Proposal Draft', 'Internal Approval', 'Proposal Approved', 'Proposal Sent', 'Negotiation'];
-const BRAND_STAGES = ['Proposal Sent', 'Negotiation', 'Proposal Approved'];
+
+
+
 const CURRENCIES = ['USD', 'EUR', 'TND', 'GBP'];
 
 function stageBadgeClass(stage: string) {
@@ -122,20 +112,20 @@ export default function Deals() {
 
   const counts = {
     all: deals.length,
-    open: deals.filter(d => OPEN_STAGES.includes(d.stage)).length,
+    open: deals.filter(d => OPEN_DEAL_STAGES.includes(d.stage)).length,
     won: deals.filter(d => d.stage === 'Won').length,
     lost: deals.filter(d => d.stage === 'Lost').length,
   };
 
   const filtered = deals.filter(d => {
-    if (filter === 'open') return OPEN_STAGES.includes(d.stage);
+    if (filter === 'open') return OPEN_DEAL_STAGES.includes(d.stage);
     if (filter === 'won') return d.stage === 'Won';
     if (filter === 'lost') return d.stage === 'Lost';
     return true;
   });
 
   const totalOpenValue = deals
-    .filter(d => OPEN_STAGES.includes(d.stage) && d.estimated_value)
+    .filter(d => OPEN_DEAL_STAGES.includes(d.stage) && d.estimated_value)
     .reduce((sum, d) => sum + (d.estimated_value || 0), 0);
 
   if (loading) {
@@ -184,7 +174,7 @@ export default function Deals() {
             {totalOpenValue.toLocaleString()}
           </p>
           <p className="text-[11px] text-text-mutedLight dark:text-text-mutedDark mt-1">
-            Across {deals.filter(d => OPEN_STAGES.includes(d.stage) && d.estimated_value).length} deals with a value set
+            Across {deals.filter(d => OPEN_DEAL_STAGES.includes(d.stage) && d.estimated_value).length} deals with a value set
           </p>
         </div>
       )}
