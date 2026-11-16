@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ACADEMY_CONTENT } from '../data/academyContent';
 import type { Chapter } from '../data/academyContent';
@@ -9,24 +9,12 @@ export default function Academy() {
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
   const [search, setSearch] = useState('');
   const [completed, setCompleted] = useState<string[]>([]);
-  
 
-  // Load progress + auto-open Ch 1 for first-time users
+  // Load progress
   useEffect(() => {
     if (!profile?.id) return;
-    
     const saved = localStorage.getItem(`bxb_academy_${profile.id}`);
-    const isNewUser = localStorage.getItem(`bxb_academy_started_${profile.id}`) === null;
-    
     if (saved) setCompleted(JSON.parse(saved));
-    
-    if (isNewUser) {
-      
-      // Auto-open Chapter 1 for the very first visit
-      const ch1 = ACADEMY_CONTENT.find(c => c.id === 'ch-1');
-      if (ch1) setActiveChapter(ch1);
-      localStorage.setItem(`bxb_academy_started_${profile.id}`, 'true');
-    }
   }, [profile]);
 
   const toggleComplete = (id: string) => {
@@ -64,7 +52,6 @@ export default function Academy() {
     if (idx > 0) setActiveChapter(availableChapters[idx - 1]);
   };
 
-  // --- READING VIEW ---
   if (activeChapter) {
     const isDone = completed.includes(activeChapter.id);
     const idx = availableChapters.findIndex(c => c.id === activeChapter.id);
@@ -78,7 +65,7 @@ export default function Academy() {
         <div className="flex-1">
           <p className="eyebrow text-[var(--brand)] mb-2">Level {activeChapter.level} • Chapter {idx + 1}</p>
           <h1 className="text-[26px] md:text-[32px] font-bold tracking-tight mb-6">{activeChapter.title}</h1>
-          
+
           <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-[15px] leading-relaxed text-[var(--text-primary)] space-y-4 whitespace-pre-wrap">
             {activeChapter.content.split('**').map((part, index) => index % 2 === 1 ? <strong key={index}>{part}</strong> : part)}
           </div>
@@ -88,7 +75,7 @@ export default function Academy() {
           <button onClick={handlePrev} disabled={idx === 0} className="btn-secondary flex-1 min-w-[120px]">
             <ArrowLeft size={16} /> Previous
           </button>
-          
+
           <button onClick={() => toggleComplete(activeChapter.id)} className={`btn-primary flex-1 min-w-[140px] ${isDone ? '!bg-state-successSoft !text-state-success' : ''}`}>
             {isDone ? <><CheckCircle2 size={16} /> Completed</> : 'Mark as Complete'}
           </button>
@@ -101,7 +88,6 @@ export default function Academy() {
     );
   }
 
-  // --- LANDING VIEW ---
   const level1Chapters = availableChapters.filter(c => c.level === 1);
   const level1Done = level1Chapters.filter(c => completed.includes(c.id)).length;
   const isBrandNew = level1Done === 0;
@@ -115,7 +101,6 @@ export default function Academy() {
         </p>
       </div>
 
-      {/* NEW USER HERO BANNER */}
       {isBrandNew && !search && (
         <div className="card !p-5 md:!p-6 mb-6 border-brand-primary/30 bg-gradient-to-br from-[var(--brand-soft)] to-transparent">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -216,7 +201,3 @@ export default function Academy() {
     </div>
   );
 }
-
-
-
-
