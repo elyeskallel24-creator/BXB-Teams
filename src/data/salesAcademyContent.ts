@@ -2,7 +2,6 @@ export type SalesCourse = {
   id: string;
   title: string;
   description: string;
-  duration: string;
   format: 'Live Cohort' | 'Self-Paced' | 'Hybrid';
   level: 'Foundation' | 'Intermediate' | 'Advanced';
   content: string;
@@ -13,7 +12,6 @@ export const SALES_ACADEMY_COURSES: SalesCourse[] = [
     id: 'module-01-psychology',
     title: 'Module 01: Psychology of Sales & Winning Mindset',
     description: 'The foundation of every high-performing salesperson. Learn the mathematics of sales, rejection resilience, confidence building, and buyer psychology.',
-    duration: '7 Days',
     format: 'Self-Paced',
     level: 'Foundation',
     content: `# MODULE 01: THE PSYCHOLOGY OF SALES AND THE WINNING MINDSET
@@ -290,7 +288,6 @@ Record three versions of a 30-second BXB introduction. Compare them for speaking
     id: 'module-02-understanding-bxb',
     title: 'Module 02: Understanding BXB, Its Services, and Its Value',
     description: 'Product knowledge, business understanding, and value communication. Learn the 6 main service categories, the BXB customer journey, pricing, and how to translate technical concepts.',
-    duration: '7 Days',
     format: 'Self-Paced',
     level: 'Foundation',
     content: `# MODULE 02: UNDERSTANDING BXB, ITS SERVICES, AND ITS VALUE
@@ -2183,7 +2180,6 @@ When you're ready, say **next**.
     id: 'module-03-market-intelligence',
     title: 'Module 03: Market Intelligence and Finding Your Own Leads',
     description: 'Learn to find potential customers independently, identify buying signals, build an Ideal Customer Profile (ICP), and create a reliable prospecting pipeline.',
-    duration: '7 Days',
     format: 'Self-Paced',
     level: 'Foundation',
     content: `# Market Intelligence and Finding Your Own Leads
@@ -3622,7 +3618,6 @@ You will learn how customers think, what motivates purchasing decisions, how to 
     id: 'module-04-buyer-psychology',
     title: 'Module 04: Understanding Customers and Buyer Psychology',
     description: 'Understand how customers think, what motivates purchasing decisions, how to uncover real needs, and how to adapt your sales approach to different people.',
-    duration: '7 Days',
     format: 'Self-Paced',
     level: 'Foundation',
     content: `# Understanding Customers and Buyer Psychology
@@ -4624,7 +4619,6 @@ Topics include:
     id: 'module-05-communication-mastery',
     title: 'Module 05: Communication Mastery and Sales Conversations',
     description: 'Become an effective communicator across every sales channel. Learn to speak confidently, explain technology simply, and guide conversations toward meaningful next steps.',
-    duration: '7 Days',
     format: 'Self-Paced',
     level: 'Foundation',
     content: `# Communication Mastery and Sales Conversations
@@ -5064,7 +5058,6 @@ You will learn:
     id: 'module-06-cold-calling',
     title: 'Module 06: Cold Calling Mastery and Telephone Prospecting',
     description: 'Become a confident, disciplined telephone prospector who can turn carefully selected strangers into meaningful business conversations, qualified opportunities, and booked meetings.',
-    duration: '7 Days',
     format: 'Self-Paced',
     level: 'Intermediate',
     content: `# Cold Calling Mastery and Telephone Prospecting

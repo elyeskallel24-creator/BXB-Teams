@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { SALES_ACADEMY_COURSES } from '../data/salesAcademyContent';
 import type { SalesCourse } from '../data/salesAcademyContent';
 import {
-  ArrowLeft, ArrowRight, CheckCircle2, Clock, Users,
+  ArrowLeft, ArrowRight, CheckCircle2, Users,
   TrendingUp, GraduationCap
 } from 'lucide-react';
 
@@ -150,9 +150,6 @@ export default function SalesAcademy() {
 
           <div className="flex flex-wrap gap-2 mb-6">
             <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider bg-[var(--bg-subtle)] text-[var(--text-secondary)] px-2.5 py-1 rounded-full border border-[var(--border)]">
-              <Clock size={12} /> {activeCourse.duration}
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider bg-[var(--bg-subtle)] text-[var(--text-secondary)] px-2.5 py-1 rounded-full border border-[var(--border)]">
               <Users size={12} /> {activeCourse.format}
             </span>
             <span className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider bg-[var(--brand-soft)] text-[var(--brand)] px-2.5 py-1 rounded-full border border-[var(--brand)]/30">
@@ -235,9 +232,6 @@ export default function SalesAcademy() {
                 {course.description}
               </p>
               <div className="flex items-center justify-between pt-3 border-t border-[var(--border)] mt-auto">
-                <span className="inline-flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] font-mono">
-                  <Clock size={12} /> {course.duration}
-                </span>
                 <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-[var(--brand)]">
                   Open <ArrowRight size={14} />
                 </span>
