@@ -114,7 +114,7 @@ export default function Leaderboard() {
                   className="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold truncate">You · {profile?.username}</p>
+                  <p className="text-[13px] font-semibold truncate">You Â· {profile?.username}</p>
                   <p className="text-[11px] text-text-mutedLight dark:text-text-mutedDark font-mono tabular-nums">{rows[myRank].points} points</p>
                 </div>
               </div>
@@ -123,7 +123,7 @@ export default function Leaderboard() {
 
           {rest.length > 0 && (
             <div>
-              <p className="eyebrow mb-2 px-1">Ranks 4–{rows.length}</p>
+              <p className="eyebrow mb-2 px-1">Ranks 4â€“{rows.length}</p>
               <div className="space-y-1.5">
                 {rest.map((r, idx) => {
                   const rank = idx + 4;
@@ -137,9 +137,9 @@ export default function Leaderboard() {
                         className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold truncate">{r.username}{isMe && ' · You'}</p>
+                        <p className="text-[13px] font-semibold truncate">{r.username}{isMe && ' Â· You'}</p>
                         <p className="text-[11px] text-text-mutedLight dark:text-text-mutedDark truncate">
-                          {[r.country_name, r.team_type].filter(Boolean).join(' · ') || '—'}
+                          {[r.country_name, r.team_type].filter(Boolean).join(' Â· ') || 'â€”'}
                         </p>
                       </div>
                       <span className="text-[13px] font-mono tabular-nums font-bold text-brand-primary shrink-0">{r.points}</span>
