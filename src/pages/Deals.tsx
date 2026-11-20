@@ -50,7 +50,7 @@ export default function Deals() {
     setLoading(true);
     const { data } = await supabase
       .from('deals')
-      .select('id, title, stage, estimated_value, currency, expected_close_date, service_description, notes')
+      .select('id, title, stage, estimated_value, currency, expected_close_date, service_description, notes, lead_id, leads(businesses(name))')
       .order('created_at', { ascending: false });
     if (data) setDeals(data as any);
     setLoading(false);
@@ -75,7 +75,7 @@ export default function Deals() {
     if (!error) {
       toast.success('Deal created');
       setTitle(''); setServiceDescription(''); setEstimatedValue('');
-      setCurrency('USD'); setExpectedCloseDate(''); setNotes('');
+      setCurrency('USD'); setExpectedCloseDate(''); setNotes(''); setLeadId('');
       setShowSheet(false);
       fetchDeals();
     } else {

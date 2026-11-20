@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   Home, Users, LayoutDashboard, CheckSquare, Menu, Bell,
@@ -38,6 +38,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Updates = lazy(() => import('./pages/Updates'));
 const Resources = lazy(() => import('./pages/Resources'));
 const Academy = lazy(() => import('./pages/Academy'));
+const SalesAcademy = lazy(() => import('./pages/SalesAcademy'));
 const Help = lazy(() => import('./pages/Help'));
 const Login = lazy(() => import('./pages/Login'));
 
@@ -80,6 +81,7 @@ const NAV_GROUPS = [
       { name: 'Resources', path: '/resources', icon: Layers },
       { name: 'Updates', path: '/updates', icon: Bell },
       { name: 'BXB Academy', path: '/academy', icon: BookOpen },
+      { name: 'BXB Sales Academy', path: '/sales-academy', icon: GraduationCap },
       { name: 'Leaderboard', path: '/leaderboard', icon: TrendingUp },
     ]
   },
@@ -259,6 +261,7 @@ function Shell() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/updates" element={<Updates />} />
                 <Route path="/resources" element={<Resources />} />
+                                <Route path="/sales-academy" element={<SalesAcademy />} />
                 <Route path="/academy" element={<Academy />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/help" element={<Help />} />

@@ -10,7 +10,6 @@ export default function Academy() {
   const [search, setSearch] = useState('');
   const [completed, setCompleted] = useState<string[]>([]);
 
-  // Load progress
   useEffect(() => {
     if (!profile?.id) return;
     const saved = localStorage.getItem(`bxb_academy_${profile.id}`);
@@ -29,7 +28,7 @@ export default function Academy() {
       if (search) {
         const q = search.toLowerCase();
         return c.title.toLowerCase().includes(q) || c.content.toLowerCase().includes(q);
-      }
+        }
       return true;
     });
   }, [profile, search]);
@@ -96,7 +95,7 @@ export default function Academy() {
     <div className="p-6 md:p-8 max-w-4xl mx-auto animate-enter">
       <div className="mb-6">
         <h1 className="page-title">BXB Academy</h1>
-        <p className="text-[13px] text-text-secondaryLight dark:text-text-secondaryDark">
+        <p className="text-[13px] text-[var(--text-secondary)]">
           Learn how to use BXB and succeed in your role.
         </p>
       </div>
@@ -155,7 +154,6 @@ export default function Academy() {
         <div className="space-y-6">
           {levels.map(lvl => {
             if (lvl.num === 3 && profile?.role !== 'admin') return null;
-
             const chapters = availableChapters.filter(c => c.level === lvl.num);
             const doneCount = chapters.filter(c => completed.includes(c.id)).length;
             const pct = chapters.length > 0 ? Math.round((doneCount / chapters.length) * 100) : 0;
