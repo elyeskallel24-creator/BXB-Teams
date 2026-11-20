@@ -75,7 +75,7 @@ export default function Deals() {
     if (!error) {
       toast.success('Deal created');
       setTitle(''); setServiceDescription(''); setEstimatedValue('');
-      setCurrency('USD'); setExpectedCloseDate(''); setNotes(''); setLeadId('');
+      setCurrency('USD'); setExpectedCloseDate(''); setNotes('');
       setShowSheet(false);
       fetchDeals();
     } else {
